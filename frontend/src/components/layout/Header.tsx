@@ -107,13 +107,30 @@ export const Header: React.FC = () => {
           )}
         </div>
 
-        {/* User Role Badge */}
-        <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800">
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{user?.fullName}</span>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-            {user?.role}
-          </span>
-        </div>
+        {/* User Role Badge or Login/Register Buttons */}
+        {user ? (
+          <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{user?.fullName}</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+              {user?.role}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800">
+            <button
+              onClick={() => navigate('/login')}
+              className="px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-lg transition"
+            >
+              Đăng nhập
+            </button>
+            <button
+              onClick={() => navigate('/register')}
+              className="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition"
+            >
+              Đăng ký
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

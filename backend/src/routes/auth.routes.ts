@@ -12,4 +12,13 @@ router.post('/refresh', validateRequest(refreshTokenSchema), AuthController.refr
 router.post('/logout', AuthController.logout);
 router.get('/me', authenticate, AuthController.getMe);
 
+// Forgot Password & Reset via Email OTP
+router.post('/forgot-password', AuthController.forgotPassword);
+router.post('/reset-password', AuthController.resetPassword);
+
+// Profile & Security Management
+router.put('/profile', authenticate, AuthController.updateProfile);
+router.put('/change-password', authenticate, AuthController.changePassword);
+router.post('/logout-all', authenticate, AuthController.logoutAllSessions);
+
 export default router;

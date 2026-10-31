@@ -52,4 +52,60 @@ export class AuthController {
       return errorResponse(res, error.message, 404);
     }
   }
+
+  static async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+      if (!email) return errorResponse(res, 'Vui lòng cung cấp địa chỉ email', 400);
+      const result = await AuthService.forgotPassword(email);
+      return successResponse(res, result, 'Đã gửi mã xác thực OTP về email');
+    } catch (error: any) {
+      return errorResponse(res, error.message || 'Lỗi khi yêu cầu quên mật khẩu', 400);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp, newPassword } = req.body;
+      if (!email || !otp || !newPassword) {
+        return errorResponse(res, 'Vui lòng cung cấp đầy đủ email, mã OTP và mật khẩu mới', 400);
+      }
+      const result = await AuthService.resetPassword({ email, otp, newPassword });
+      return successResponse(res, result, 'Đặt lại mật khẩu thành công');
+    } catch (error: any) {
+      return errorResponse(res, error.message || 'Lỗi khi đặt lại mật khẩu', 400);
+    }
+  }
+
+  static async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return errorResponse(res, 'Vui lòng nhập mật khẩu hiện tại và mật khẩu mới', 400);
+      }
+      const result = await AuthService.changePassword(req.user!.userId, { currentPassword, newPassword });
+      return successResponse(res, result, 'Đổi mật khẩu thành công');
+    } catch (error: any) {
+      return errorResponse(res, error.message || 'Lỗi khi đổi mật khẩu', 400);
+    }
+  }
+
+  static async updateProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { fullName, avatar } = req.body;
+      const result = await AuthService.updateProfile(req.user!.userId, { fullName, avatar });
+      return successResponse(res, result, 'Cập nhật thông tin thành công');
+    } catch (error: any) {
+      return errorResponse(res, error.message || 'Lỗi khi cập nhật thông tin', 400);
+    }
+  }
+
+  static async logoutAllSessions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await AuthService.logoutAllSessions(req.user!.userId);
+      return successResponse(res, result, 'Đã đăng xuất khỏi tất cả các thiết bị khác');
+    } catch (error: any) {
+      return errorResponse(res, error.message, 500);
+    }
+  }
 }

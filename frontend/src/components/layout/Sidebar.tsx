@@ -17,6 +17,8 @@ import {
   LogOut,
   UploadCloud,
   Sparkles,
+  Settings,
+  LogIn,
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -40,9 +42,7 @@ export const Sidebar: React.FC = () => {
       {/* Brand Logo */}
       <div className="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
         <NavLink to="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-100 dark:shadow-none">
-            <Sparkles className="w-5 h-5" />
-          </div>
+          <img src="/logo.png" alt="SmartDoc Logo" className="w-10 h-10 object-contain rounded-xl" />
           <div>
             <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
               SmartDoc
@@ -105,6 +105,10 @@ export const Sidebar: React.FC = () => {
               <BarChart3 className="w-4 h-4" />
               <span>Tiến độ & Đề xuất AI</span>
             </NavLink>
+            <NavLink to="/settings" className={navItemClass}>
+              <Settings className="w-4 h-4" />
+              <span>Cài đặt & Bảo mật</span>
+            </NavLink>
           </div>
         </div>
 
@@ -151,28 +155,50 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* User Footer Profile */}
-      <div className="p-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <img
-            src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'User')}&background=6366f1&color=fff`}
-            alt={user?.fullName}
-            className="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-100 dark:ring-slate-700"
-          />
-          <div className="truncate">
-            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{user?.fullName}</p>
-            <div className="flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span className="text-[10px] font-medium text-slate-400 capitalize">{user?.role.toLowerCase()}</span>
-            </div>
+      <div className="p-3.5 border-t border-slate-100 dark:border-slate-800">
+        {user ? (
+          <div className="flex items-center justify-between">
+            <NavLink to="/settings" className="flex items-center gap-3 overflow-hidden group">
+              <img
+                src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'User')}&background=2563eb&color=fff`}
+                alt={user?.fullName}
+                className="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-100 dark:ring-slate-700"
+              />
+              <div className="truncate">
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-indigo-600 transition">
+                  {user?.fullName}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span className="text-[10px] font-medium text-slate-400 capitalize">{user?.role.toLowerCase()}</span>
+                </div>
+              </div>
+            </NavLink>
+            <button
+              onClick={handleLogout}
+              title="Đăng xuất"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
-        </div>
-        <button
-          onClick={handleLogout}
-          title="Đăng xuất"
-          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition"
-        >
-          <LogOut className="w-4 h-4" />
-        </button>
+        ) : (
+          <div className="space-y-2">
+            <NavLink
+              to="/login"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Đăng nhập</span>
+            </NavLink>
+            <NavLink
+              to="/register"
+              className="w-full flex items-center justify-center py-1.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs transition"
+            >
+              <span>Đăng ký tài khoản</span>
+            </NavLink>
+          </div>
+        )}
       </div>
     </aside>
   );
