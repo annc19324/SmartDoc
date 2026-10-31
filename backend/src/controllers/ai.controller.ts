@@ -24,7 +24,7 @@ export class AIController {
 
   static async getDocumentSummaries(req: Request, res: Response, next: NextFunction) {
     try {
-      const { documentId } = req.params;
+      const { documentId } = req.params as { documentId: string };
       const summaries = await prisma.summary.findMany({
         where: { documentId },
         orderBy: { createdAt: 'desc' },
@@ -79,7 +79,7 @@ export class AIController {
 
   static async getQuizById(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const quiz = await prisma.quiz.findUnique({
         where: { id },
         include: {
@@ -96,7 +96,7 @@ export class AIController {
 
   static async submitQuiz(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const { answers } = req.body; // { [questionId]: number }
       if (!answers) return errorResponse(res, 'Vui lòng cung cấp câu trả lời', 400);
 
@@ -139,7 +139,7 @@ export class AIController {
 
   static async getMindmapById(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const mindmap = await prisma.mindmap.findUnique({
         where: { id },
         include: { document: true },
@@ -188,7 +188,7 @@ export class AIController {
 
   static async getFlashcardDeckById(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const deck = await prisma.flashcardDeck.findUnique({
         where: { id },
         include: { cards: { orderBy: { order: 'asc' } }, document: true },

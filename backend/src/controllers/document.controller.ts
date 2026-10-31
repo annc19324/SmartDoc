@@ -56,7 +56,7 @@ export class DocumentController {
 
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const document = await DocumentService.getDocumentById(id);
       return successResponse(res, document, 'Chi tiết tài liệu');
     } catch (error: any) {
@@ -79,7 +79,7 @@ export class DocumentController {
 
   static async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       await DocumentService.deleteDocument(id, req.user!.userId, req.user!.role);
       return successResponse(res, null, 'Xóa tài liệu thành công');
     } catch (error: any) {

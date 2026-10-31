@@ -18,7 +18,7 @@ export class CourseController {
 
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const course = await CourseService.getCourseById(id);
       return successResponse(res, course);
     } catch (error: any) {
@@ -77,7 +77,7 @@ export class NotificationController {
 
   static async markAsRead(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       await NotificationService.markAsRead(id, req.user!.userId);
       return successResponse(res, null, 'Đã đánh dấu đã đọc');
     } catch (error: any) {
@@ -117,7 +117,7 @@ export class AdminController {
 
   static async toggleUserStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const { isActive } = req.body;
       const updated = await AdminService.updateUserStatus(id, isActive);
       return successResponse(res, updated, 'Cập nhật trạng thái người dùng thành công');
@@ -128,7 +128,7 @@ export class AdminController {
 
   static async changeUserRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const { role } = req.body;
       const updated = await AdminService.updateUserRole(id, role);
       return successResponse(res, updated, 'Cập nhật phân quyền thành công');

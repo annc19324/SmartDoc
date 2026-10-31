@@ -24,7 +24,7 @@ export class ChatController {
 
   static async getSession(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const session = await ChatService.getSessionWithMessages(id, req.user!.userId);
       return successResponse(res, session, 'Chi tiết phiên trò chuyện');
     } catch (error: any) {
@@ -34,7 +34,7 @@ export class ChatController {
 
   static async sendMessage(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const { question } = req.body;
       if (!question || typeof question !== 'string') {
         return errorResponse(res, 'Nội dung câu hỏi không được để trống', 400);
@@ -49,7 +49,7 @@ export class ChatController {
 
   static async deleteSession(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       await ChatService.deleteSession(id, req.user!.userId);
       return successResponse(res, null, 'Đã xóa phiên trò chuyện');
     } catch (error: any) {
