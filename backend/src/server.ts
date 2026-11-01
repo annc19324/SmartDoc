@@ -19,7 +19,7 @@ const app = express();
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(
   cors({
-    origin: (requestOrigin, callback) => {
+    origin: (requestOrigin: any, callback: any) => {
       if (!requestOrigin) return callback(null, true);
       const allowed = [env.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'];
       if (
@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use('/uploads', express.static('uploads'));
 
 // Health Check
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', (_req: express.Request, res: express.Response) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),

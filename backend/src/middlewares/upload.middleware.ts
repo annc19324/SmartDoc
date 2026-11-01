@@ -19,7 +19,7 @@ export const uploadDocumentMiddleware = multer({
   limits: {
     fileSize: 30 * 1024 * 1024, // 30MB
   },
-  fileFilter: (_req, file, cb) => {
+  fileFilter: (_req: any, file: any, cb: any) => {
     if (allowedMimeTypes.includes(file.mimetype) || file.originalname.match(/\.(pdf|doc|docx|txt|md|png|jpe?g|webp)$/i)) {
       cb(null, true);
     } else {

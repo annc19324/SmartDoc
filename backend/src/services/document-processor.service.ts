@@ -142,7 +142,7 @@ export class DocumentProcessorService {
       } else if (parsed.text) {
         // Fallback: split by form feed character (\f) which often separates PDF pages
         const rawPages = parsed.text.split('\f');
-        rawPages.forEach((pText, idx) => {
+        rawPages.forEach((pText: string, idx: number) => {
           if (pText.trim()) {
             pages.push({ pageNumber: idx + 1, text: pText.trim() });
           }

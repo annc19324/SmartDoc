@@ -76,7 +76,7 @@ export const uploadToCloudinary = (
         }
       );
 
-      uploadStream.end(fileBuffer);
+      (uploadStream as any).end(fileBuffer);
     } catch (streamErr: any) {
       console.warn('⚠️ Cloudinary stream exception:', streamErr.message);
       resolve(saveFileLocally(fileBuffer, filename));
