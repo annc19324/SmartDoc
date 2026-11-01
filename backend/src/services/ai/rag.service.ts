@@ -132,10 +132,10 @@ export class RAGService {
     if (chunks.length === 0) {
       // If no relevant documents found in RAG
       const generalAnswer = await GeminiService.generateText(
-        `Người dùng hỏi: "${question}". Hiện tại không tìm thấy đoạn trích phù hợp trong tài liệu đã chọn. Hãy trả lời một cách lịch sự, giải thích ngắn gọn dựa trên kiến thức chung nhưng nhắc nhở người dùng tải lên hoặc chọn tài liệu liên quan.`
+        `Người dùng hỏi: "${question}". Hiện tại không tìm thấy đoạn trích phù hợp trong tài liệu đã chọn. Hãy trả lời một cách lịch sự, giải thích ngắn gọn dựa trên kiến thức chung nhưng nhắc nhở người dùng tải lên hoặc chọn tài liệu liên quan. TUYỆT ĐỐI KHÔNG dùng ký tự thăng ### hoặc dấu sao **.`
       );
       return {
-        answer: generalAnswer,
+        answer: GeminiService.cleanMarkdownSymbols(generalAnswer),
         sources: [],
       };
     }
@@ -155,7 +155,7 @@ Nhiệm vụ của bạn là trả lời câu hỏi của người học dựa C
 QUY TẮC BẮT BUỘC:
 1. Luôn ưu tiên thông tin chính xác từ tài liệu được trích dẫn.
 2. Khi đưa ra thông tin từ tài liệu, hãy chỉ rõ bạn lấy từ trang nào (ví dụ: "Theo Trang 12 của tài liệu...").
-3. Trình bày câu trả lời rõ ràng, định dạng Markdown đẹp mắt (sử dụng bullet points, in đậm từ khóa quan trọng, công thức nếu có).
+3. Trình bày câu trả lời rõ ràng, văn phong tự nhiên, dùng gạch đầu dòng (-) hoặc số thứ tự, TUYỆT ĐỐI KHÔNG dùng ký tự thăng ### hoặc dấu sao **.
 4. Giữ giọng điệu học thuật, khích lệ, sư phạm, chuẩn xác.
 5. Nếu trong ngữ cảnh không có thông tin để trả lời câu hỏi, hãy trung thực thông báo: "Tài liệu này không đề cập đến nội dung bạn vừa hỏi", sau đó có thể hỗ trợ tóm tắt kiến thức chung một cách ngắn gọn.`;
 
@@ -173,7 +173,8 @@ Câu hỏi mới của người dùng:
 Hãy trả lời câu hỏi trên dựa vào các đoạn tài liệu được cung cấp.`;
 
     // 4. Generate answer with Gemini
-    const answer = await GeminiService.generateText(prompt, systemInstruction);
+    const rawAnswer = await GeminiService.generateText(prompt, systemInstruction);
+    const answer = GeminiService.cleanMarkdownSymbols(rawAnswer);
 
     // 5. Build clean Sources array
     const sources: RAGSource[] = chunks.map((c) => ({

@@ -64,6 +64,25 @@ export class DocumentController {
     }
   }
 
+  static async download(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params as { id: string };
+      const document = await DocumentService.getDocumentById(id);
+      if (!document || !document.fileUrl) {
+        return errorResponse(res, 'Tài liệu không tồn tại', 404);
+      }
+
+      let downloadUrl = document.fileUrl;
+      if (downloadUrl.includes('cloudinary.com') && downloadUrl.includes('/upload/')) {
+        downloadUrl = downloadUrl.replace('/upload/', '/upload/fl_attachment/');
+      }
+
+      return res.redirect(downloadUrl);
+    } catch (error: any) {
+      return errorResponse(res, error.message, 500);
+    }
+  }
+
   static async smartSearch(req: Request, res: Response, next: NextFunction) {
     try {
       const { q, limit } = req.query;

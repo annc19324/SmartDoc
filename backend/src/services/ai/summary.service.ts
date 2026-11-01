@@ -67,8 +67,12 @@ Hãy trả về kết quả dưới định dạng JSON chính xác theo cấu t
   ]
 }`;
 
-    const systemInstruction = 'Bạn là chuyên gia sư phạm và tổng hợp kiến thức học thuật cao cấp của SmartDoc. Trả lời bằng tiếng Việt chuẩn xác.';
+    const systemInstruction =
+      'Bạn là chuyên gia sư phạm và tổng hợp kiến thức học thuật cao cấp của SmartDoc. Trả lời bằng tiếng Việt chuẩn xác. Tuyệt đối KHÔNG dùng ký tự thăng ### hoặc dấu sao ** trong nội dung.';
     const result = await GeminiService.generateJSON<SummaryOutput>(prompt, systemInstruction);
+
+    const cleanContent = GeminiService.cleanMarkdownSymbols(result.content || '');
+    const cleanKeyPoints = (result.keyPoints || []).map((pt) => GeminiService.cleanMarkdownSymbols(pt));
 
     // Save or update to database
     const summary = await prisma.summary.create({
@@ -76,8 +80,8 @@ Hãy trả về kết quả dưới định dạng JSON chính xác theo cấu t
         documentId,
         userId,
         type,
-        content: result.content || '',
-        keyPoints: result.keyPoints || [],
+        content: cleanContent,
+        keyPoints: cleanKeyPoints,
         importantTerms: result.importantTerms || [],
       },
     });

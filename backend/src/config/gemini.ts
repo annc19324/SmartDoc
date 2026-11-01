@@ -3,32 +3,33 @@ import { env } from './env.js';
 
 let genAI: GoogleGenerativeAI | null = null;
 
-if (env.GEMINI_API_KEY) {
-  genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-} else {
-  console.warn('⚠️ GEMINI_API_KEY is not defined in environment. AI features will require the API key.');
-}
+export const isGeminiConfigured = (): boolean => {
+  return Boolean(
+    env.GEMINI_API_KEY &&
+      env.GEMINI_API_KEY.trim() !== '' &&
+      env.GEMINI_API_KEY !== 'your_gemini_api_key_here'
+  );
+};
 
-export const getGeminiModel = (modelName: string = 'gemini-1.5-flash') => {
+export const getGeminiModel = (modelName: string = 'gemini-3.5-flash-lite') => {
+  if (!isGeminiConfigured()) {
+    throw new Error('GEMINI_API_KEY_NOT_CONFIGURED');
+  }
   if (!genAI) {
-    if (env.GEMINI_API_KEY) {
-      genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-    } else {
-      throw new Error('GEMINI_API_KEY is missing. Please set it in your .env file to use AI features.');
-    }
+    genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
   }
   return genAI.getGenerativeModel({ model: modelName });
 };
 
-export const getEmbeddingModel = (modelName: string = 'text-embedding-004') => {
+export const getEmbeddingModel = (modelName: string = 'gemini-embedding-001') => {
+  if (!isGeminiConfigured()) {
+    throw new Error('GEMINI_API_KEY_NOT_CONFIGURED');
+  }
   if (!genAI) {
-    if (env.GEMINI_API_KEY) {
-      genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-    } else {
-      throw new Error('GEMINI_API_KEY is missing. Please set it in your .env file to generate embeddings.');
-    }
+    genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
   }
   return genAI.getGenerativeModel({ model: modelName });
 };
 
 export { genAI };
+

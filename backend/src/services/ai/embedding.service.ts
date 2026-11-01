@@ -10,10 +10,12 @@ export class EmbeddingService {
       // Clean and normalize text
       const cleanText = text.replace(/\s+/g, ' ').trim().slice(0, 8000);
       const result = await model.embedContent(cleanText);
-      return result.embedding.values;
+      const raw = result.embedding.values;
+      const sliced = raw.length >= 768 ? raw.slice(0, 768) : raw.concat(new Array(768 - raw.length).fill(0));
+      const norm = Math.sqrt(sliced.reduce((sum, val) => sum + val * val, 0));
+      return sliced.map((v) => (norm > 0 ? v / norm : 0));
     } catch (error: any) {
-      console.error('Error generating embedding via Gemini API:', error.message);
-      // Fallback deterministic dummy vector if API key is not yet set or in offline sandbox
+      console.warn('Embedding API fallback to deterministic vector:', error.message);
       return this.generateSimulatedVector(text);
     }
   }

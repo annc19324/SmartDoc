@@ -8,6 +8,7 @@ const router = Router();
 router.get('/', DocumentController.list);
 router.get('/smart-search', DocumentController.smartSearch);
 router.get('/:id', DocumentController.getById);
+router.get('/:id/download', DocumentController.download);
 router.post('/upload', authenticate, uploadDocumentMiddleware.single('file'), DocumentController.upload);
 router.delete('/:id', authenticate, DocumentController.delete);
 

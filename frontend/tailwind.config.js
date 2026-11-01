@@ -28,6 +28,16 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
+      fontSize: {
+        '2xs': ['0.75rem', { lineHeight: '1rem' }],
+        'xs': ['0.825rem', { lineHeight: '1.25rem' }],
+        'sm': ['0.925rem', { lineHeight: '1.45rem' }],
+        'base': ['1.025rem', { lineHeight: '1.65rem' }],
+        'lg': ['1.15rem', { lineHeight: '1.75rem' }],
+        'xl': ['1.3rem', { lineHeight: '1.85rem' }],
+        '2xl': ['1.55rem', { lineHeight: '2.1rem' }],
+        '3xl': ['1.9rem', { lineHeight: '2.35rem' }],
+      },
     },
   },
   plugins: [],

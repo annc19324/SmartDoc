@@ -39,6 +39,14 @@ export interface Course {
   _count?: { documents: number; quizzes: number };
 }
 
+export interface DocumentChunk {
+  id: string;
+  documentId?: string;
+  content: string;
+  pageNumber: number;
+  chunkIndex: number;
+}
+
 export interface Document {
   id: string;
   title: string;
@@ -60,6 +68,7 @@ export interface Document {
   uploadedBy?: User;
   createdAt: string;
   updatedAt: string;
+  chunks?: DocumentChunk[];
   _count?: {
     chunks: number;
     summaries: number;

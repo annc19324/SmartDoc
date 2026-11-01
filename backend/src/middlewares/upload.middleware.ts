@@ -23,7 +23,7 @@ export const uploadDocumentMiddleware = multer({
     if (allowedMimeTypes.includes(file.mimetype) || file.originalname.match(/\.(pdf|doc|docx|txt|md|png|jpe?g|webp)$/i)) {
       cb(null, true);
     } else {
-      cb(new Error('Unsupported file type. Supported formats: PDF, DOC, DOCX, TXT, MD, Images.'));
+      cb(new Error('Định dạng tệp không được hỗ trợ. Hệ thống chỉ hỗ trợ tài liệu học tập: PDF, Word (DOC, DOCX), TXT, MD và Ảnh.'));
     }
   },
 });

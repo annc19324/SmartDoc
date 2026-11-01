@@ -17,6 +17,7 @@ import {
   RefreshCw,
   AlertTriangle,
 } from 'lucide-react';
+import { formatFileType } from '../../utils/formatters';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -53,49 +54,53 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-8 pb-12">
       {/* 1. Welcome Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-cyan-600 text-white p-8 shadow-xl shadow-indigo-100 dark:shadow-none">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-cyan-200 mb-3 border border-white/10">
-            <Sparkles className="w-3.5 h-3.5" />
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-cyan-600 text-white p-4 sm:p-8 md:p-10 shadow-xl shadow-indigo-100 dark:shadow-none">
+        <div className="relative z-10 max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-cyan-200 mb-2 sm:mb-4 border border-white/10">
+            <Sparkles className="w-4 h-4" />
             <span>SmartDoc AI 2.0 • RAG Powered</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-            Xin chào, {user?.fullName}! 👋
-          </h1>
-          <p className="mt-2 text-indigo-100 text-xs md:text-sm leading-relaxed">
-            Hôm nay bạn muốn học nội dung gì? Hãy tải lên giáo trình hoặc đặt câu hỏi trực tiếp để SmartDoc AI trích dẫn
-            và phân tích ngay.
-          </p>
 
-          {/* Quick Action Buttons */}
-          <div className="mt-6 flex flex-wrap gap-2.5">
+          {/* Long text hidden on mobile phones, displayed from tablet up */}
+          <h1 className="hidden sm:block text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight leading-snug">
+            Hãy tải lên giáo trình hoặc đặt câu hỏi trực tiếp để SmartDoc AI trích dẫn và phân tích ngay.
+          </h1>
+
+          {/* Quick Action Buttons: 4 compact columns on phone, flex row on tablet/desktop */}
+          <div className="mt-3 sm:mt-7 grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3.5">
             <button
               onClick={() => navigate('/documents/upload')}
-              className="px-4 py-2 bg-white text-indigo-700 hover:bg-slate-50 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition"
+              className="px-1.5 py-2.5 sm:px-5 sm:py-3 bg-white text-indigo-700 hover:bg-indigo-50 rounded-xl sm:rounded-2xl font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2.5 shadow-md transition"
             >
-              <UploadCloud className="w-4 h-4" />
-              <span>Tải tài liệu</span>
+              <UploadCloud className="w-5 h-5 sm:w-5 sm:h-5 shrink-0" />
+              <span className="text-[11px] sm:text-base whitespace-nowrap">
+                <span className="sm:hidden">Tải lên</span>
+                <span className="hidden sm:inline">Tải tài liệu</span>
+              </span>
             </button>
             <button
               onClick={() => navigate('/chat')}
-              className="px-4 py-2 bg-indigo-500/40 hover:bg-indigo-500/60 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 backdrop-blur-md border border-white/20 transition"
+              className="px-1.5 py-2.5 sm:px-5 sm:py-3 bg-indigo-500/40 hover:bg-indigo-500/60 text-white rounded-xl sm:rounded-2xl font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2.5 backdrop-blur-md border border-white/20 transition"
             >
-              <MessageSquareCode className="w-4 h-4" />
-              <span>Hỏi AI</span>
+              <MessageSquareCode className="w-5 h-5 sm:w-5 sm:h-5 shrink-0" />
+              <span className="text-[11px] sm:text-base whitespace-nowrap">Hỏi AI</span>
             </button>
             <button
               onClick={() => navigate('/quiz')}
-              className="px-4 py-2 bg-indigo-500/40 hover:bg-indigo-500/60 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 backdrop-blur-md border border-white/20 transition"
+              className="px-1.5 py-2.5 sm:px-5 sm:py-3 bg-indigo-500/40 hover:bg-indigo-500/60 text-white rounded-xl sm:rounded-2xl font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2.5 backdrop-blur-md border border-white/20 transition"
             >
-              <BrainCircuit className="w-4 h-4" />
-              <span>Làm Quiz</span>
+              <BrainCircuit className="w-5 h-5 sm:w-5 sm:h-5 shrink-0" />
+              <span className="text-[11px] sm:text-base whitespace-nowrap">
+                <span className="sm:hidden">Quiz</span>
+                <span className="hidden sm:inline">Làm Quiz</span>
+              </span>
             </button>
             <button
               onClick={() => navigate('/flashcards')}
-              className="px-4 py-2 bg-indigo-500/40 hover:bg-indigo-500/60 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 backdrop-blur-md border border-white/20 transition"
+              className="px-1.5 py-2.5 sm:px-5 sm:py-3 bg-indigo-500/40 hover:bg-indigo-500/60 text-white rounded-xl sm:rounded-2xl font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2.5 backdrop-blur-md border border-white/20 transition"
             >
-              <CreditCard className="w-4 h-4" />
-              <span>Flashcard</span>
+              <CreditCard className="w-5 h-5 sm:w-5 sm:h-5 shrink-0" />
+              <span className="text-[11px] sm:text-base whitespace-nowrap">Flashcard</span>
             </button>
           </div>
         </div>
@@ -105,16 +110,16 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* 2. AI Recommendation Banner */}
-      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/70 dark:bg-slate-900 dark:border-slate-800 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-200 dark:shadow-none">
-            <Sparkles className="w-5 h-5" />
+      <div className="rounded-2xl sm:rounded-3xl border border-indigo-100 bg-indigo-50/70 dark:bg-slate-900 dark:border-slate-800 p-4 sm:p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-200 dark:shadow-none">
+            <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" />
           </div>
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
               Đề xuất học tập thông minh từ AI
             </h3>
-            <p className="text-xs md:text-sm text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 mt-1 sm:mt-2 leading-relaxed">
               {analytics?.aiRecommendation ||
                 'Bạn đang tiến bộ rất nhanh! Hãy duy trì ôn tập 15-20 phút mỗi ngày bằng Flashcard và làm Quiz để củng cố trí nhớ dài hạn.'}
             </p>
@@ -123,52 +128,52 @@ export const DashboardPage: React.FC = () => {
         <button
           onClick={() => refreshMutation.mutate()}
           disabled={refreshMutation.isPending}
-          className="shrink-0 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 flex items-center gap-1.5 transition"
+          className="shrink-0 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 flex items-center gap-2 transition self-end md:self-auto"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
           <span>Làm mới gợi ý</span>
         </button>
       </div>
 
       {/* 3. Learning Metrics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-medium">Thời gian học</span>
-            <Clock className="w-4 h-4 text-indigo-500" />
+            <span className="text-xs sm:text-sm font-semibold">Thời gian học</span>
+            <Clock className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-indigo-500" />
           </div>
-          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-            {analytics?.totalStudyMinutes || 120} <span className="text-xs font-medium text-slate-400">phút</span>
+          <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
+            {analytics?.totalStudyMinutes || 120} <span className="text-xs sm:text-base font-semibold text-slate-400">phút</span>
           </p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-medium">Điểm Quiz TB</span>
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
+            <span className="text-xs sm:text-sm font-semibold">Điểm Quiz TB</span>
+            <TrendingUp className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-emerald-500" />
           </div>
-          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-            {analytics?.averageQuizScore || 8.0} <span className="text-xs font-medium text-slate-400">/ 10</span>
+          <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
+            {analytics?.averageQuizScore || 8.0} <span className="text-xs sm:text-base font-semibold text-slate-400">/ 10</span>
           </p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-medium">Flashcards ôn tập</span>
-            <CheckCircle2 className="w-4 h-4 text-cyan-500" />
+            <span className="text-xs sm:text-sm font-semibold">Flashcards ôn</span>
+            <CheckCircle2 className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-cyan-500" />
           </div>
-          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-            {analytics?.flashcardsReviewed || 25} <span className="text-xs font-medium text-slate-400">thẻ</span>
+          <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
+            {analytics?.flashcardsReviewed || 25} <span className="text-xs sm:text-base font-semibold text-slate-400">thẻ</span>
           </p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-medium">Tài liệu đã học</span>
-            <BookOpen className="w-4 h-4 text-amber-500" />
+            <span className="text-xs sm:text-sm font-semibold">Tài liệu đã học</span>
+            <BookOpen className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-amber-500" />
           </div>
-          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">
-            {analytics?.documentsViewed || 4} <span className="text-xs font-medium text-slate-400">tài liệu</span>
+          <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
+            {analytics?.documentsViewed || 4} <span className="text-xs sm:text-base font-semibold text-slate-400">tài liệu</span>
           </p>
         </div>
       </div>
@@ -178,28 +183,28 @@ export const DashboardPage: React.FC = () => {
         {/* Left: Recent Documents (2 cols) */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-indigo-600" />
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+              <BookOpen className="w-5 h-5 text-indigo-600" />
               <span>Tài liệu học tập gần đây</span>
             </h2>
             <button
               onClick={() => navigate('/documents')}
-              className="text-xs font-semibold text-indigo-600 hover:underline flex items-center gap-1"
+              className="text-sm font-semibold text-indigo-600 hover:underline flex items-center gap-1.5"
             >
               <span>Xem tất cả</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {docsLoading ? (
-              <div className="col-span-2 py-8 text-center text-xs text-slate-400">Đang tải tài liệu...</div>
+              <div className="col-span-2 py-10 text-center text-sm text-slate-400">Đang tải tài liệu...</div>
             ) : recentDocs.length === 0 ? (
-              <div className="col-span-2 p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
-                <p className="text-xs text-slate-400 mb-3">Bạn chưa có tài liệu nào trong thư viện.</p>
+              <div className="col-span-2 p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
+                <p className="text-sm text-slate-400 mb-3">Bạn chưa có tài liệu nào trong thư viện.</p>
                 <button
                   onClick={() => navigate('/documents/upload')}
-                  className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold"
                 >
                   Tải lên tài liệu đầu tiên
                 </button>
@@ -209,12 +214,12 @@ export const DashboardPage: React.FC = () => {
                 <div
                   key={doc.id}
                   onClick={() => navigate(`/documents/${doc.id}`)}
-                  className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between"
+                  className="p-5 md:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between text-[11px] mb-2">
                       <span className="font-semibold text-indigo-600 uppercase bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded">
-                        {doc.fileType.split('/')[1] || 'PDF'}
+                        {formatFileType(doc.fileType)}
                       </span>
                       <span
                         className={`font-semibold px-2 py-0.5 rounded ${

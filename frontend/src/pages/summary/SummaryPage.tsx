@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { documentApi, aiApi } from '../../services/api';
 import { SummaryType } from '../../types';
-import { FileText, Sparkles, CheckCircle2, RefreshCw, BookOpen } from 'lucide-react';
+import { FileText, Sparkles, CheckCircle2, RefreshCw, BookOpen, Printer } from 'lucide-react';
+import { FormattedText, cleanMarkdownText } from '../../components/common/FormattedText';
 
 export const SummaryPage: React.FC = () => {
   const [selectedDocId, setSelectedDocId] = useState<string>('');
@@ -36,20 +37,20 @@ export const SummaryPage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
             <FileText className="w-6 h-6 text-indigo-600" />
             <span>Tóm Tắt Tài Liệu Bằng AI</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Chọn tài liệu và loại tóm tắt mong muốn để AI đúc kết các luận điểm cốt lõi và thuật ngữ trọng tâm
           </p>
         </div>
       </div>
 
       {/* Control Box */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-sm space-y-4 no-print">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -108,54 +109,75 @@ export const SummaryPage: React.FC = () => {
 
       {/* Summary Content View */}
       {!selectedDocId ? (
-        <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8">
-          <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Chưa chọn tài liệu</p>
-          <p className="text-[11px] text-slate-400 mt-1">Vui lòng chọn tài liệu ở danh sách trên để xem hoặc tạo tóm tắt.</p>
+        <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-10">
+          <BookOpen className="w-14 h-14 text-slate-300 mx-auto mb-3" />
+          <p className="text-base font-bold text-slate-700 dark:text-slate-300">Chưa chọn tài liệu</p>
+          <p className="text-sm text-slate-400 mt-2">Vui lòng chọn tài liệu ở danh sách trên để xem hoặc tạo tóm tắt.</p>
         </div>
       ) : loadingSummaries ? (
-        <div className="py-16 text-center text-xs text-slate-400">Đang tải bản tóm tắt...</div>
+        <div className="py-20 text-center text-base text-slate-400">Đang tải bản tóm tắt...</div>
       ) : !currentSummary ? (
-        <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8">
-          <Sparkles className="w-10 h-10 text-indigo-400 mx-auto mb-2" />
-          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Chưa có bản tóm tắt loại này</p>
-          <p className="text-[11px] text-slate-400 mt-1">
+        <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-10">
+          <Sparkles className="w-14 h-14 text-indigo-400 mx-auto mb-3" />
+          <p className="text-base font-bold text-slate-700 dark:text-slate-300">Chưa có bản tóm tắt loại này</p>
+          <p className="text-sm text-slate-400 mt-2">
             Bấm nút "Tạo tóm tắt AI ngay" ở trên để hệ thống tự động sinh nội dung cho bạn.
           </p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-8 md:p-10 shadow-sm space-y-6 sm:space-y-7">
+          {/* Header visible ONLY when printing / exporting to PDF */}
+          <div className="hidden print:block border-b-2 border-slate-800 pb-4 mb-6">
+            <h1 className="text-2xl font-bold text-slate-900">
+              SMARTDOC AI • BẢN TÓM TẮT & ĐỀ CƯƠNG ÔN TẬP
+            </h1>
+            <p className="text-sm text-slate-600 mt-1">
+              Tài liệu: <strong>{documents.find((d) => d.id === selectedDocId)?.title || 'Tài liệu học tập'}</strong> • Loại tóm tắt: {currentSummary.type} • Ngày xuất: {new Date().toLocaleDateString('vi-VN')}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-5 gap-3 no-print">
             <div>
-              <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-50 px-2 py-0.5 rounded">
+              <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/50 dark:text-indigo-400 px-3 py-1.5 rounded-xl">
                 {currentSummary.type}
               </span>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mt-1">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mt-2">
                 Tóm tắt tài liệu thông minh
               </h2>
             </div>
-            <button
-              onClick={() => generateMutation.mutate()}
-              disabled={generateMutation.isPending}
-              className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Tạo lại</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => window.print()}
+                className="px-3.5 py-2 sm:px-4 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition"
+                title="Xuất file PDF hoặc In ra giấy để học offline"
+              >
+                <Printer className="w-4 h-4 text-indigo-600" />
+                <span className="hidden sm:inline">Xuất PDF / In</span>
+                <span className="sm:hidden">In</span>
+              </button>
+              <button
+                onClick={() => generateMutation.mutate()}
+                disabled={generateMutation.isPending}
+                className="px-3.5 py-2 sm:px-4 sm:py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="hidden sm:inline">Tạo lại</span>
+              </button>
+            </div>
           </div>
 
-          <div className="text-xs leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
-            {currentSummary.content}
+          <div className="text-base md:text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+            <FormattedText content={currentSummary.content} />
           </div>
 
           {currentSummary.keyPoints && currentSummary.keyPoints.length > 0 && (
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-600">Luận điểm trọng tâm</h3>
-              <ul className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
+            <div className="p-6 md:p-7 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-4">
+              <h3 className="text-base md:text-lg font-bold uppercase tracking-wider text-indigo-600">Luận điểm trọng tâm</h3>
+              <ul className="space-y-3 text-base text-slate-700 dark:text-slate-300">
                 {currentSummary.keyPoints.map((pt, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>{pt}</span>
+                  <li key={idx} className="flex items-start gap-3 leading-relaxed">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>{cleanMarkdownText(pt)}</span>
                   </li>
                 ))}
               </ul>
@@ -163,13 +185,13 @@ export const SummaryPage: React.FC = () => {
           )}
 
           {currentSummary.importantTerms && currentSummary.importantTerms.length > 0 && (
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-600">Thuật ngữ & Khái niệm</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="p-6 md:p-7 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-4">
+              <h3 className="text-base md:text-lg font-bold uppercase tracking-wider text-cyan-600">Thuật ngữ & Khái niệm</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {currentSummary.importantTerms.map((t, idx) => (
-                  <div key={idx} className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                    <p className="font-bold text-xs text-slate-900 dark:text-white">{t.term}</p>
-                    <p className="text-[11px] text-slate-500 mt-1">{t.definition}</p>
+                  <div key={idx} className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <p className="font-bold text-base text-slate-900 dark:text-white">{t.term}</p>
+                    <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">{t.definition}</p>
                   </div>
                 ))}
               </div>

@@ -22,6 +22,9 @@ import { MindmapPage } from '../pages/mindmap/MindmapPage';
 import { StudyPlanPage } from '../pages/study-plan/StudyPlanPage';
 import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
+import { ProfileSettingsPage } from '../pages/settings/ProfileSettingsPage';
+import { SecuritySettingsPage } from '../pages/settings/SecuritySettingsPage';
+import { SessionsSettingsPage } from '../pages/settings/SessionsSettingsPage';
 import { TeacherCoursesPage } from '../pages/teacher/TeacherCoursesPage';
 import { AdminMetricsPage } from '../pages/admin/AdminMetricsPage';
 import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
@@ -54,7 +57,10 @@ export const AppRouter: React.FC = () => {
           <Route path="/mindmap" element={<MindmapPage />} />
           <Route path="/study-plan" element={<StudyPlanPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings" element={<Navigate to="/settings/profile" replace />} />
+          <Route path="/settings/profile" element={<ProfileSettingsPage />} />
+          <Route path="/settings/security" element={<SecuritySettingsPage />} />
+          <Route path="/settings/sessions" element={<SessionsSettingsPage />} />
 
           {/* Teacher Only */}
           <Route element={<RoleRoute allowedRoles={['TEACHER', 'ADMIN']} />}>

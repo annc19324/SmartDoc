@@ -14,6 +14,7 @@ import {
   BookOpen,
   ArrowLeft,
 } from 'lucide-react';
+import { cleanMarkdownText } from '../../components/common/FormattedText';
 
 export const FlashcardsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -123,8 +124,8 @@ export const FlashcardsPage: React.FC = () => {
                       <span className="uppercase tracking-wider">Mặt sau (Giải thích / Định nghĩa)</span>
                       <RotateCw className="w-4 h-4 text-cyan-400" />
                     </div>
-                    <div className="text-center font-medium text-sm md:text-base leading-relaxed px-4 whitespace-pre-wrap">
-                      {activeDeck.cards[currentCardIndex].back}
+                    <div className="text-center font-medium text-sm md:text-base leading-relaxed px-4">
+                      {cleanMarkdownText(activeDeck.cards[currentCardIndex].back)}
                     </div>
                     <div className="text-center text-[11px] text-indigo-300">
                       Bấm vào thẻ để quay lại mặt trước

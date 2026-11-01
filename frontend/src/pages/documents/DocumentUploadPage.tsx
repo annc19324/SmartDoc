@@ -25,24 +25,40 @@ export const DocumentUploadPage: React.FC = () => {
     queryFn: () => systemApi.listCourses(),
   });
 
+  const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.txt', '.md', '.jpg', '.jpeg', '.png', '.webp'];
+
+  const validateAndSetFile = (selectedFile: File): boolean => {
+    const ext = '.' + (selectedFile.name.split('.').pop() || '').toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      setError(
+        `⚠️ Định dạng tệp "${ext || 'không xác định'}" không hợp lệ! Hệ thống chỉ hỗ trợ tài liệu học tập: PDF, Word (.docx, .doc), Text (.txt), Markdown (.md) và Hình ảnh.`
+      );
+      setFile(null);
+      return false;
+    }
+    if (selectedFile.size > 30 * 1024 * 1024) {
+      setError('⚠️ Dung lượng tệp vượt quá giới hạn 30MB. Vui lòng chọn tệp nhỏ hơn.');
+      setFile(null);
+      return false;
+    }
+    setError(null);
+    setFile(selectedFile);
+    if (!title) {
+      setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''));
+    }
+    return true;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-      if (!title) {
-        setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''));
-      }
+      validateAndSetFile(e.target.files[0]);
     }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      setFile(droppedFile);
-      if (!title) {
-        setTitle(droppedFile.name.replace(/\.[^/.]+$/, ''));
-      }
+      validateAndSetFile(e.dataTransfer.files[0]);
     }
   };
 

@@ -161,6 +161,10 @@ export class DocumentService {
           category: true,
           course: true,
           uploadedBy: { select: { id: true, fullName: true, avatar: true, email: true } },
+          chunks: {
+            select: { id: true, content: true, pageNumber: true, chunkIndex: true },
+            orderBy: { chunkIndex: 'asc' },
+          },
           _count: {
             select: {
               chunks: true,
@@ -202,7 +206,30 @@ export class DocumentService {
       category: { id: 'cat-1', name: 'Cấu trúc dữ liệu & Giải thuật', slug: 'dsa' },
       course: { id: 'c-1', title: 'Cấu trúc dữ liệu nâng cao', code: 'CS201-DSA' },
       uploadedBy: { id: 'u-1', fullName: 'ThS. Nguyễn Văn Giảng Viên', avatar: null, email: 'teacher@smartdoc.edu.vn' },
-      _count: { chunks: 12, summaries: 2, quizzes: 3, flashcardDecks: 2, mindmaps: 1 },
+      chunks: [
+        {
+          id: 'chunk-1',
+          documentId: id,
+          chunkIndex: 0,
+          pageNumber: 1,
+          content: 'CHƯƠNG 1: TỔNG QUAN VỀ CẤU TRÚC DỮ LIỆU VÀ GIẢI THUẬT\n\n1. Định nghĩa và Tầm quan trọng:\nCấu trúc dữ liệu (Data Structure) là cách thức tổ chức, quản lý và lưu trữ dữ liệu để có thể truy cập và sửa đổi một cách hiệu quả. Giải thuật (Algorithm) là tập hợp các bước tính toán tuần tự có điểm kết thúc nhằm giải quyết một bài toán cụ thể.\n\n2. Đánh giá hiệu năng giải thuật:\nĐộ phức tạp tính toán được biểu diễn qua ký hiệu Big-O (O-notation):\n- Thời gian thực thi (Time Complexity): Đo số lượng thao tác cơ bản theo kích thước đầu vào N.\n- Không gian bộ nhớ (Space Complexity): Đo lượng ô nhớ phụ cần sử dụng trong suốt quá trình xử lý.',
+        },
+        {
+          id: 'chunk-2',
+          documentId: id,
+          chunkIndex: 1,
+          pageNumber: 2,
+          content: 'CHƯƠNG 2: CÁC THUẬT TOÁN SẮP XẾP KINH ĐIỂN\n\n1. Sắp xếp trộn (Merge Sort):\n- Nguyên lý: Áp dụng tư tưởng Chia để trị (Divide and Conquer). Mảng dữ liệu được chia đôi liên tục cho đến khi các mảng con chỉ còn 1 phần tử, sau đó tiến hành gộp (Merge) lại theo thứ tự tăng dần.\n- Độ phức tạp: Luôn đạt O(N log N) trong mọi trường hợp (tốt nhất, trung bình, xấu nhất). Thuật toán có tính ổn định (Stable).\n- Nhược điểm: Đòi hỏi không gian bộ nhớ phụ O(N).\n\n2. Sắp xếp nhanh (Quick Sort):\n- Nguyên lý: Chọn một phần tử làm chốt (Pivot) và phân vùng (Partition) mảng sao cho các phần tử nhỏ hơn pivot nằm ở bên trái, các phần tử lớn hơn pivot nằm ở bên phải.\n- Độ phức tạp: Trung bình O(N log N). Trường hợp xấu nhất O(N^2) khi phần tử chốt được chọn liên tục là nhỏ nhất hoặc lớn nhất trên mảng gần như đã sắp xếp.',
+        },
+        {
+          id: 'chunk-3',
+          documentId: id,
+          chunkIndex: 2,
+          pageNumber: 3,
+          content: 'CHƯƠNG 3: CÂY NHỊ PHÂN VÀ CÂY TÌM KIẾM NHỊ PHÂN (BST)\n\n1. Khái niệm Cây nhị phân:\nMỗi nút (Node) trong cây có tối đa hai nút con, thường được gọi là con trái (Left Child) và con phải (Right Child).\n\n2. Đặc tính của Cây tìm kiếm nhị phân (Binary Search Tree - BST):\n- Với mỗi nút N: Mọi nút trong cây con trái có giá trị nhỏ hơn khóa của N.\n- Mọi nút trong cây con phải có giá trị lớn hơn khóa của N.\n- Không tồn tại hai nút có cùng giá trị khóa.\n- Độ phức tạp thao tác tìm kiếm, chèn, xóa trên BST cân bằng là O(log N). Trong trường hợp suy biến thành danh sách liên kết, độ phức tạp là O(N).',
+        },
+      ],
+      _count: { chunks: 3, summaries: 2, quizzes: 3, flashcardDecks: 2, mindmaps: 1 },
     };
   }
 

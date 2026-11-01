@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiClient } from '../../services/api/client';
 import {
@@ -14,6 +14,8 @@ import {
   Smartphone,
   Save,
   Lock,
+  Camera,
+  Upload,
 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
@@ -24,6 +26,7 @@ export const SettingsPage: React.FC = () => {
   // Profile Form state
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [avatar, setAvatar] = useState(user?.avatar || '');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Password Form state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -40,6 +43,30 @@ export const SettingsPage: React.FC = () => {
   const clearNotifications = () => {
     setSuccessMessage(null);
     setErrorMessage(null);
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErrorMessage('Vui lòng chọn tệp định dạng hình ảnh (PNG, JPG, WEBP).');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage('Dung lượng ảnh không được vượt quá 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setAvatar(reader.result);
+        setSuccessMessage('Đã tải ảnh từ thiết bị thành công! Nhấn "Lưu thay đổi" để áp dụng.');
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   // Update Profile
@@ -110,17 +137,17 @@ export const SettingsPage: React.FC = () => {
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-          <Shield className="w-6 h-6 text-indigo-600" />
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+          <Shield className="w-7 h-7 text-indigo-600" />
           <span>Cài Đặt & Trung Tâm Bảo Mật</span>
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-sm text-slate-500 mt-1.5">
           Quản lý thông tin tài khoản, đổi mật khẩu và giám sát các phiên đăng nhập
         </p>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 text-xs font-semibold gap-6">
+      <div className="flex border-b border-slate-200 dark:border-slate-800 text-sm font-semibold gap-6">
         <button
           onClick={() => {
             setActiveTab('profile');
@@ -132,7 +159,7 @@ export const SettingsPage: React.FC = () => {
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <User className="w-4 h-4" />
+          <User className="w-4.5 h-4.5" />
           <span>Thông tin cá nhân</span>
         </button>
 
@@ -147,7 +174,7 @@ export const SettingsPage: React.FC = () => {
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <KeyRound className="w-4 h-4" />
+          <KeyRound className="w-4.5 h-4.5" />
           <span>Đổi mật khẩu & Bảo mật</span>
         </button>
 
@@ -162,7 +189,7 @@ export const SettingsPage: React.FC = () => {
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <Laptop className="w-4 h-4" />
+          <Laptop className="w-4.5 h-4.5" />
           <span>Phiên đăng nhập & Thiết bị</span>
         </button>
       </div>
@@ -185,18 +212,42 @@ export const SettingsPage: React.FC = () => {
       {/* Tab 1: Profile Information */}
       {activeTab === 'profile' && (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
-          <div className="flex items-center gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
-            <img
-              src={avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || 'User')}&background=2563eb&color=fff`}
-              alt="Avatar"
-              className="w-16 h-16 rounded-2xl object-cover ring-4 ring-indigo-50"
-            />
-            <div>
+          <div className="flex flex-wrap items-center gap-5 pb-6 border-b border-slate-100 dark:border-slate-800">
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              <img
+                src={avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || 'User')}&background=2563eb&color=fff`}
+                alt="Avatar"
+                className="w-20 h-20 rounded-2xl object-cover ring-4 ring-indigo-50 dark:ring-slate-800 shadow"
+              />
+              <div className="absolute inset-0 bg-black/40 rounded-2xl flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition duration-200">
+                <Camera className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-bold">Đổi ảnh</span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">{fullName || 'Họ và tên'}</h3>
               <p className="text-xs text-slate-500">{user?.email}</p>
-              <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                Vai trò: {user?.role}
-              </span>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-xs font-semibold flex items-center gap-1.5 transition"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Tải ảnh từ thiết bị</span>
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageFileChange}
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                />
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  {user?.role}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -228,15 +279,18 @@ export const SettingsPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                URL Ảnh đại diện (Avatar Link)
+                Hoặc nhập URL Ảnh đại diện (Avatar Link)
               </label>
               <input
                 type="text"
-                value={avatar}
+                value={avatar.startsWith('data:') ? '' : avatar}
                 onChange={(e) => setAvatar(e.target.value)}
                 placeholder="https://images.unsplash.com/..."
                 className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
               />
+              {avatar.startsWith('data:') && (
+                <p className="text-[11px] text-emerald-600 mt-1">✓ Đang chọn ảnh từ thiết bị của bạn.</p>
+              )}
             </div>
 
             <button

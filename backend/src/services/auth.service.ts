@@ -100,8 +100,17 @@ export class AuthService {
         refreshToken,
       };
     } catch (err: any) {
-      if (err.message && (err.message.includes('Authentication failed') || err.message.includes("Can't reach database"))) {
-        console.warn('⚠️ Database connection issue during register. Falling back to Demo session.');
+      if (
+        err.code === 'P2021' ||
+        err.code === 'P1000' ||
+        err.code === 'P1001' ||
+        (err.message &&
+          (err.message.includes('Authentication failed') ||
+            err.message.includes("Can't reach database") ||
+            err.message.includes('does not exist') ||
+            err.message.includes('table `public.users` does not exist')))
+      ) {
+        console.warn('⚠️ Database connection issue or table missing during register. Falling back to Demo session:', err.message);
         const mockId = `mock-user-${Date.now()}`;
         const mockUser = {
           id: mockId,
@@ -175,13 +184,17 @@ export class AuthService {
         refreshToken,
       };
     } catch (err: any) {
-      // If database credentials fail or not connected, enable graceful Demo login
+      // If database credentials fail or not connected or table missing, enable graceful Demo login
       if (
-        err.message &&
-        (err.message.includes('Authentication failed') ||
-          err.message.includes("Can't reach database") ||
-          err.message.includes('P1000') ||
-          err.message.includes('P1001'))
+        err.code === 'P2021' ||
+        err.code === 'P1000' ||
+        err.code === 'P1001' ||
+        (err.message &&
+          (err.message.includes('Authentication failed') ||
+            err.message.includes("Can't reach database") ||
+            err.message.includes('does not exist') ||
+            err.message.includes('P1000') ||
+            err.message.includes('P1001')))
       ) {
         console.warn('⚠️ Database connection issue during login. Allowing seamless Demo authentication.');
         return this.loginDemoUser(cleanEmail, data.password);
