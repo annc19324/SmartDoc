@@ -26,7 +26,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Roboto', 'system-ui', '-apple-system', 'Segoe UI', 'Arial', 'sans-serif'],
       },
       fontSize: {
         '2xs': ['0.75rem', { lineHeight: '1rem' }],
