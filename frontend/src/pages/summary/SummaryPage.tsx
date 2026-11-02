@@ -118,7 +118,7 @@ export const SummaryPage: React.FC = () => {
         <div className="py-20 text-center text-base text-slate-400">Đang tải bản tóm tắt...</div>
       ) : !currentSummary ? (
         <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-10">
-          <Sparkles className="w-14 h-14 text-indigo-400 mx-auto mb-3" />
+          <img src="/ai-logo.png" alt="SmartDoc AI" className="w-12 h-12 object-contain mx-auto mb-3" />
           <p className="text-base font-bold text-slate-700 dark:text-slate-300">Chưa có bản tóm tắt loại này</p>
           <p className="text-sm text-slate-400 mt-2">
             Bấm nút "Tạo tóm tắt AI ngay" ở trên để hệ thống tự động sinh nội dung cho bạn.

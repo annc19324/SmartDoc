@@ -88,7 +88,7 @@ const TreeNode: React.FC<{
           } hover:scale-[1.02]`}
         >
           {level === 0 && (
-            <img src="/logo.png" alt="Root" className="w-5 h-5 rounded-md object-contain bg-white p-0.5" />
+            <img src="/ai-logo.png" alt="Root" className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0" />
           )}
           {level === 1 && <span className={`w-2.5 h-2.5 rounded-full ${theme.badge} shrink-0`} />}
           {level > 1 && <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />}
@@ -179,7 +179,7 @@ export const MindmapPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-            <img src="/logo.png" alt="SmartDoc" className="w-6 h-6 rounded-md object-contain" />
+            <img src="/ai-logo.png" alt="SmartDoc AI" className="w-5 h-5 sm:w-6 sm:h-6 object-contain shrink-0" />
             <span>Sơ Đồ Tư Duy Kiến Thức (Mindmap)</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -277,7 +277,7 @@ export const MindmapPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <img src="/logo.png" alt="SmartDoc" className="w-5 h-5 rounded-md object-contain" />
+                <img src="/ai-logo.png" alt="SmartDoc AI" className="w-5 h-5 object-contain shrink-0" />
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Tạo Sơ Đồ Tư Duy Kiến Thức</h3>
               </div>
               <button

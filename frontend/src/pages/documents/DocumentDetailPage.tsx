@@ -614,7 +614,7 @@ export const DocumentDetailPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <img src="/logo.png" alt="SmartDoc" className="w-5 h-5 rounded-xs object-contain" />
+              <img src="/ai-logo.png" alt="SmartDoc AI" className="w-5 h-5 object-contain shrink-0" />
               <span>Bản tóm tắt nội dung học tập</span>
             </h2>
             <button

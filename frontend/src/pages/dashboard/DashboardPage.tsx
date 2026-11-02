@@ -57,7 +57,7 @@ export const DashboardPage: React.FC = () => {
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-cyan-600 text-white p-4 sm:p-8 md:p-10 shadow-xl shadow-indigo-100 dark:shadow-none">
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-cyan-200 mb-2 sm:mb-3 border border-white/10">
-            <img src="/logo.png" alt="SmartDoc" className="w-4.5 h-4.5 rounded-sm object-contain" />
+            <img src="/ai-logo.png" alt="SmartDoc AI" className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0" />
             <span>SmartDoc • Nền tảng Học tập Thông minh</span>
           </div>
 

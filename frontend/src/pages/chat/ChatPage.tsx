@@ -295,7 +295,7 @@ export const ChatPage: React.FC = () => {
               <MessageSquareCode className="w-5 h-5" />
             </button>
 
-            <img src="/logo.png" alt="SmartDoc" className="w-6 h-6 rounded-md object-contain shrink-0" />
+            <img src="/ai-logo.png" alt="SmartDoc AI" className="w-5 h-5 sm:w-6 sm:h-6 object-contain shrink-0" />
             <h2 className="text-base md:text-lg font-bold text-slate-800 dark:text-slate-200 truncate">
               {currentSession?.title || 'SmartDoc Trợ lý Học tập'}
             </h2>
@@ -311,7 +311,7 @@ export const ChatPage: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-5 md:p-8 space-y-7">
           {!activeSessionId ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-8">
-              <Sparkles className="w-16 h-16 text-indigo-400 mb-4" />
+              <img src="/ai-logo.png" alt="SmartDoc AI" className="w-12 h-12 object-contain mb-3 drop-shadow-xs" />
               <h3 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-200">
                 Chào mừng bạn đến với Trợ lý RAG SmartDoc
               </h3>
@@ -338,8 +338,8 @@ export const ChatPage: React.FC = () => {
                 }`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-xs mt-0.5 p-1.5">
-                    <img src="/logo.png" alt="SmartDoc" className="w-full h-full object-contain" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-2xs mt-0.5 p-1">
+                    <img src="/ai-logo.png" alt="SmartDoc AI" className="w-4.5 h-4.5 sm:w-5 sm:h-5 object-contain shrink-0" />
                   </div>
                 )}
 
@@ -384,8 +384,8 @@ export const ChatPage: React.FC = () => {
 
           {(sendMessageMutation.isPending || isUploadingAttachment) && (
             <div className="flex gap-3 sm:gap-3.5 justify-start text-sm sm:text-base">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 animate-pulse">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-2xs mt-0.5 p-1 animate-pulse">
+                <img src="/ai-logo.png" alt="SmartDoc AI" className="w-4.5 h-4.5 sm:w-5 sm:h-5 object-contain shrink-0" />
               </div>
               <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl sm:rounded-3xl rounded-bl-none p-4 sm:p-5 text-slate-600 dark:text-slate-300 flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm">
                 <span className="inline-block w-4 h-4 sm:w-5 sm:h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>

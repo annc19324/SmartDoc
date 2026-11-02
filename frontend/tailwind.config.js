@@ -28,6 +28,12 @@ export default {
       fontFamily: {
         sans: ['Roboto', 'system-ui', '-apple-system', 'Segoe UI', 'Arial', 'sans-serif'],
       },
+      spacing: {
+        '3.5': '0.875rem',
+        '4.5': '1.125rem',
+        '5.5': '1.375rem',
+        '18': '4.5rem',
+      },
       fontSize: {
         '2xs': ['0.75rem', { lineHeight: '1rem' }],
         'xs': ['0.825rem', { lineHeight: '1.25rem' }],
