@@ -295,9 +295,9 @@ export const ChatPage: React.FC = () => {
               <MessageSquareCode className="w-5 h-5" />
             </button>
 
-            <Sparkles className="w-5 h-5 text-indigo-600 shrink-0" />
+            <img src="/logo.png" alt="SmartDoc" className="w-6 h-6 rounded-md object-contain shrink-0" />
             <h2 className="text-base md:text-lg font-bold text-slate-800 dark:text-slate-200 truncate">
-              {currentSession?.title || 'SmartDoc RAG AI Assistant'}
+              {currentSession?.title || 'SmartDoc Trợ lý Học tập'}
             </h2>
             {currentSession?.document && (
               <span className="text-xs bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 px-3 py-1.5 rounded-xl font-bold truncate max-w-[200px] md:max-w-sm ml-1.5 border border-indigo-100/60 dark:border-indigo-900/60">
@@ -338,8 +338,8 @@ export const ChatPage: React.FC = () => {
                 }`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-xs mt-0.5 p-1.5">
+                    <img src="/logo.png" alt="SmartDoc" className="w-full h-full object-contain" />
                   </div>
                 )}
 

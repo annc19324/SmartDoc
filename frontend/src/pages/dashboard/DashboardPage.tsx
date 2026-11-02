@@ -56,18 +56,18 @@ export const DashboardPage: React.FC = () => {
       {/* 1. Welcome Section */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-cyan-600 text-white p-4 sm:p-8 md:p-10 shadow-xl shadow-indigo-100 dark:shadow-none">
         <div className="relative z-10 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-cyan-200 mb-2 sm:mb-4 border border-white/10">
-            <Sparkles className="w-4 h-4" />
-            <span>SmartDoc AI 2.0 • RAG Powered</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-cyan-200 mb-2 sm:mb-3 border border-white/10">
+            <img src="/logo.png" alt="SmartDoc" className="w-4.5 h-4.5 rounded-sm object-contain" />
+            <span>SmartDoc • Nền tảng Học tập Thông minh</span>
           </div>
 
-          {/* Long text hidden on mobile phones, displayed from tablet up */}
-          <h1 className="hidden sm:block text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight leading-snug">
+          {/* Heading text with comfortable, readable font size */}
+          <h1 className="hidden sm:block text-base sm:text-lg md:text-xl font-medium leading-relaxed max-w-2xl text-indigo-50">
             Hãy tải lên giáo trình hoặc đặt câu hỏi trực tiếp để SmartDoc AI trích dẫn và phân tích ngay.
           </h1>
 
           {/* Quick Action Buttons: 4 compact columns on phone, flex row on tablet/desktop */}
-          <div className="mt-3 sm:mt-7 grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3.5">
+          <div className="mt-3 sm:mt-6 grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3.5">
             <button
               onClick={() => navigate('/documents/upload')}
               className="px-1.5 py-2.5 sm:px-5 sm:py-3 bg-white text-indigo-700 hover:bg-indigo-50 rounded-xl sm:rounded-2xl font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2.5 shadow-md transition"
@@ -109,33 +109,7 @@ export const DashboardPage: React.FC = () => {
         <div className="absolute right-0 top-0 -mt-12 -mr-12 w-96 h-96 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none"></div>
       </div>
 
-      {/* 2. AI Recommendation Banner */}
-      <div className="rounded-2xl sm:rounded-3xl border border-indigo-100 bg-indigo-50/70 dark:bg-slate-900 dark:border-slate-800 p-4 sm:p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-200 dark:shadow-none">
-            <Sparkles className="w-5 h-5 sm:w-7 sm:h-7" />
-          </div>
-          <div>
-            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
-              Đề xuất học tập thông minh từ AI
-            </h3>
-            <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 mt-1 sm:mt-2 leading-relaxed">
-              {analytics?.aiRecommendation ||
-                'Bạn đang tiến bộ rất nhanh! Hãy duy trì ôn tập 15-20 phút mỗi ngày bằng Flashcard và làm Quiz để củng cố trí nhớ dài hạn.'}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => refreshMutation.mutate()}
-          disabled={refreshMutation.isPending}
-          className="shrink-0 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 flex items-center gap-2 transition self-end md:self-auto"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-          <span>Làm mới gợi ý</span>
-        </button>
-      </div>
-
-      {/* 3. Learning Metrics Cards */}
+      {/* 2. Learning Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
         <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">

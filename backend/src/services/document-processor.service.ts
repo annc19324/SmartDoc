@@ -149,18 +149,30 @@ export class DocumentProcessorService {
         });
       }
     } else if (fileType.includes('word') || fileType.includes('docx') || fileType.includes('officedocument')) {
-      // DOCX via Mammoth
+      // DOCX via Mammoth - cleanly preserve natural paragraphs and line breaks
       const result = await mammoth.extractRawText({ buffer: fileBuffer });
-      const fullText = result.value || '';
-      // Approximate 2000 chars per page for DOCX
-      const wordsPerPage = 400;
-      const words = fullText.split(/\s+/);
+      const fullText = (result.value || '').trim();
+
+      // Split into logical paragraphs while maintaining newlines
+      const rawParas = fullText.split(/\r?\n+/).map((p) => p.trim()).filter((p) => p.length > 0);
+
       let pageNum = 1;
-      for (let i = 0; i < words.length; i += wordsPerPage) {
-        const pageWords = words.slice(i, i + wordsPerPage).join(' ');
-        if (pageWords.trim()) {
-          pages.push({ pageNumber: pageNum++, text: pageWords.trim() });
+      let currentPageParas: string[] = [];
+      let currentWordCount = 0;
+
+      for (const para of rawParas) {
+        const wordsInPara = para.split(/\s+/).length;
+        if (currentWordCount + wordsInPara > 350 && currentPageParas.length > 0) {
+          pages.push({ pageNumber: pageNum++, text: currentPageParas.join('\n\n') });
+          currentPageParas = [para];
+          currentWordCount = wordsInPara;
+        } else {
+          currentPageParas.push(para);
+          currentWordCount += wordsInPara;
         }
+      }
+      if (currentPageParas.length > 0) {
+        pages.push({ pageNumber: pageNum, text: currentPageParas.join('\n\n') });
       }
     } else {
       // Plain text or markdown

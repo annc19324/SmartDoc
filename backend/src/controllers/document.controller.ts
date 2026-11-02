@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { DocumentService } from '../services/document.service.js';
 import { successResponse, errorResponse } from '../utils/api-response.js';
+import fs from 'fs';
+import path from 'path';
 
 export class DocumentController {
   static async upload(req: Request, res: Response, next: NextFunction) {
@@ -72,9 +74,33 @@ export class DocumentController {
         return errorResponse(res, 'Tài liệu không tồn tại', 404);
       }
 
+      // Determine proper file extension
+      let ext = 'pdf';
+      const ft = (document.fileType || '').toLowerCase();
+      if (ft.includes('word') || ft.includes('docx') || ft.includes('officedocument')) ext = 'docx';
+      else if (ft.includes('msword') || ft.includes('doc')) ext = 'doc';
+      else if (ft.includes('txt') || ft.includes('plain')) ext = 'txt';
+      else if (ft.includes('png')) ext = 'png';
+      else if (ft.includes('jpeg') || ft.includes('jpg')) ext = 'jpg';
+
+      const safeTitle = (document.title || 'tai_lieu')
+        .replace(/[\\/:*?"<>|]/g, '_')
+        .replace(/\.[^/.]+$/, '');
+      const downloadFilename = `${safeTitle}.${ext}`;
+
+      // 1. Local file on server disk
+      if (document.fileUrl.startsWith('/uploads/') || document.fileUrl.startsWith('uploads/')) {
+        const cleanRelPath = document.fileUrl.replace(/^\//, '');
+        const fullDiskPath = path.resolve(process.cwd(), cleanRelPath);
+        if (fs.existsSync(fullDiskPath)) {
+          return res.download(fullDiskPath, downloadFilename);
+        }
+      }
+
+      // 2. Cloudinary or Remote URL
       let downloadUrl = document.fileUrl;
       if (downloadUrl.includes('cloudinary.com') && downloadUrl.includes('/upload/')) {
-        downloadUrl = downloadUrl.replace('/upload/', '/upload/fl_attachment/');
+        downloadUrl = downloadUrl.replace('/upload/', `/upload/fl_attachment:${encodeURIComponent(safeTitle)}/`);
       }
 
       return res.redirect(downloadUrl);

@@ -74,22 +74,112 @@ export const DocumentDetailPage: React.FC = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Direct download handler
+  // Direct download handler ensuring correct binary download with .docx or .pdf extension
   const handleDownloadFile = () => {
-    if (!document?.fileUrl) return;
-    let url = document.fileUrl;
-    // If Cloudinary url, force attachment download
-    if (url.includes('cloudinary.com') && url.includes('/upload/')) {
-      url = url.replace('/upload/', '/upload/fl_attachment/');
-    }
-    const link = window.document.createElement('a');
-    link.href = url;
-    link.download = document.title || 'document';
-    link.target = '_blank';
-    link.rel = 'noreferrer';
-    window.document.body.appendChild(link);
-    link.click();
-    window.document.body.removeChild(link);
+    if (!document) return;
+    let ext = 'pdf';
+    const ft = (document.fileType || '').toLowerCase();
+    if (ft.includes('word') || ft.includes('docx') || ft.includes('officedocument')) ext = 'docx';
+    else if (ft.includes('msword') || ft.includes('doc')) ext = 'doc';
+    else if (ft.includes('txt') || ft.includes('plain')) ext = 'txt';
+    else if (ft.includes('png')) ext = 'png';
+    else if (ft.includes('jpeg') || ft.includes('jpg')) ext = 'jpg';
+
+    const safeTitle = (document.title || 'tai_lieu')
+      .replace(/[\\/:*?"<>|]/g, '_')
+      .replace(/\.[^/.]+$/, '');
+    const filename = `${safeTitle}.${ext}`;
+
+    const downloadApiUrl = `/api/documents/${document.id}/download`;
+
+    // Fetch binary blob to force browser to save with exact file extension
+    fetch(downloadApiUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error('Download failed');
+        return res.blob();
+      })
+      .then((blob) => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = window.document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        window.document.body.appendChild(link);
+        link.click();
+        window.URL.revokeObjectURL(blobUrl);
+        window.document.body.removeChild(link);
+      })
+      .catch(() => {
+        window.open(downloadApiUrl, '_blank');
+      });
+  };
+
+  // Smart formatting function to structure run-together textbook text
+  const renderFormattedChunk = (raw: string) => {
+    if (!raw) return null;
+
+    // Auto insert line breaks before numbered points and key labels if crammed together
+    let cleaned = raw
+      .replace(/([.!?])\s+([0-9]+\.\s+)/g, '$1\n\n$2')
+      .replace(/(Quy tắc [^\n:]+:?)/g, '\n$1\n\n')
+      .replace(
+        /([.!?])\s+(Động từ:|Danh từ & Tính từ:|Danh từ:|Tính từ:|Từ "lưỡng tính"[^:]*:|Từ lưỡng tính[^:]*:|Ngoại lệ:|Hậu tố[^:]*:)/g,
+        '$1\n\n• $2'
+      )
+      .replace(/([.!?])\s+(Ví dụ:)/g, '$1\n   ↳ $2');
+
+    const blocks = cleaned
+      .split(/\r?\n+/)
+      .map((b) => b.trim())
+      .filter((b) => b.length > 0);
+
+    return (
+      <div className="space-y-2.5">
+        {blocks.map((block, idx) => {
+          // Check if block is a section header (e.g. "1. Từ có 2 âm tiết" or "Quy tắc...")
+          const isSectionHeader = /^[0-9]+\.\s+/.test(block) || block.startsWith('Quy tắc');
+          if (isSectionHeader) {
+            return (
+              <div key={idx} className="pt-2 pb-1 border-b border-indigo-100/70 dark:border-slate-800">
+                <h4 className="font-bold text-sm sm:text-base text-indigo-700 dark:text-indigo-400">
+                  {block}
+                </h4>
+              </div>
+            );
+          }
+
+          // Check if line is an example
+          if (block.startsWith('↳') || block.startsWith('Ví dụ:')) {
+            return (
+              <div
+                key={idx}
+                className="pl-4 py-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium italic bg-slate-50 dark:bg-slate-800/40 rounded-lg"
+              >
+                {block}
+              </div>
+            );
+          }
+
+          // Bullet item
+          if (block.startsWith('•')) {
+            return (
+              <div
+                key={idx}
+                className="flex items-start gap-2 pl-1 text-xs sm:text-sm md:text-base leading-relaxed text-slate-800 dark:text-slate-200"
+              >
+                <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                <span>{block.replace(/^•\s*/, '')}</span>
+              </div>
+            );
+          }
+
+          return (
+            <p key={idx} className="text-xs sm:text-sm md:text-base leading-relaxed text-slate-800 dark:text-slate-200">
+              {block}
+            </p>
+          );
+        })}
+      </div>
+    );
   };
 
   // Extract unique page numbers from chunks
@@ -171,13 +261,13 @@ export const DocumentDetailPage: React.FC = () => {
             {/* 1. Xem nội dung (switch to content tab) */}
             <button
               onClick={() => setActiveTab('content')}
-              className={`px-4.5 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 transition ${
+              className={`px-6 py-3 rounded-2xl text-sm sm:text-base font-semibold flex items-center gap-2.5 shadow-xs transition ${
                 activeTab === 'content'
                   ? 'bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-indigo-950/60 dark:border-indigo-800'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
               }`}
             >
-              <Eye className="w-4.5 h-4.5 text-indigo-600" />
+              <Eye className="w-5 h-5 text-indigo-600 shrink-0" />
               <span>Xem tài liệu</span>
             </button>
 
@@ -185,9 +275,9 @@ export const DocumentDetailPage: React.FC = () => {
             <button
               onClick={handleDownloadFile}
               title="Tải tệp gốc về máy tính"
-              className="px-4.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-sm font-bold flex items-center gap-2 transition"
+              className="px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-sm sm:text-base font-semibold flex items-center gap-2.5 shadow-xs transition"
             >
-              <Download className="w-4.5 h-4.5 text-emerald-600" />
+              <Download className="w-5 h-5 text-emerald-600 shrink-0" />
               <span>Tải về máy</span>
             </button>
 
@@ -364,8 +454,8 @@ export const DocumentDetailPage: React.FC = () => {
                         </button>
                       </div>
 
-                      <div className="text-xs sm:text-sm md:text-base leading-relaxed text-slate-800 dark:text-slate-200 font-normal whitespace-pre-line">
-                        {chunk.content}
+                      <div className="text-xs sm:text-sm md:text-base leading-relaxed text-slate-800 dark:text-slate-200 font-normal">
+                        {renderFormattedChunk(chunk.content)}
                       </div>
                     </div>
                   ))}
@@ -524,8 +614,8 @@ export const DocumentDetailPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-600" />
-              <span>Bản tóm tắt nội dung AI</span>
+              <img src="/logo.png" alt="SmartDoc" className="w-5 h-5 rounded-xs object-contain" />
+              <span>Bản tóm tắt nội dung học tập</span>
             </h2>
             <button
               onClick={() => generateSummaryMutation.mutate('DETAILED')}
@@ -543,7 +633,7 @@ export const DocumentDetailPage: React.FC = () => {
               <button
                 onClick={() => generateSummaryMutation.mutate('DETAILED')}
                 disabled={generateSummaryMutation.isPending}
-                className="px-4.5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs sm:text-sm font-bold"
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-semibold shadow-sm transition"
               >
                 Bấm để AI tạo tóm tắt ngay
               </button>
