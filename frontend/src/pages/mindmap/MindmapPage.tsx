@@ -171,8 +171,13 @@ export const MindmapPage: React.FC = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showHelpPill, setShowHelpPill] = useState(true);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const treeRef = useRef<HTMLDivElement>(null);
+  const scaleRef = useRef(scale);
+  scaleRef.current = scale;
+  const panRef = useRef(pan);
+  panRef.current = pan;
+  const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ mouseX: 0, mouseY: 0, panX: 0, panY: 0 });
 
   const { data: mindmaps = [], isLoading } = useQuery({
@@ -205,17 +210,18 @@ export const MindmapPage: React.FC = () => {
     }
 
     setIsDragging(true);
+    isDraggingRef.current = true;
     dragStartRef.current = {
       mouseX: e.clientX,
       mouseY: e.clientY,
-      panX: pan.x,
-      panY: pan.y,
+      panX: panRef.current.x,
+      panY: panRef.current.y,
     };
   };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
+      if (!isDraggingRef.current) return;
       const dx = e.clientX - dragStartRef.current.mouseX;
       const dy = e.clientY - dragStartRef.current.mouseY;
       setPan({
@@ -225,35 +231,37 @@ export const MindmapPage: React.FC = () => {
     };
 
     const handleMouseUp = () => {
-      setIsDragging(false);
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+        setIsDragging(false);
+      }
     };
 
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging]);
+  }, []);
 
   // 2. Touch Drag Support for Mobile/Tablet
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       const touch = e.touches[0];
       setIsDragging(true);
+      isDraggingRef.current = true;
       dragStartRef.current = {
         mouseX: touch.clientX,
         mouseY: touch.clientY,
-        panX: pan.x,
-        panY: pan.y,
+        panX: panRef.current.x,
+        panY: panRef.current.y,
       };
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || e.touches.length !== 1) return;
+    if (!isDraggingRef.current || e.touches.length !== 1) return;
     const touch = e.touches[0];
     const dx = touch.clientX - dragStartRef.current.mouseX;
     const dy = touch.clientY - dragStartRef.current.mouseY;
@@ -264,40 +272,62 @@ export const MindmapPage: React.FC = () => {
   };
 
   const handleTouchEnd = () => {
+    isDraggingRef.current = false;
     setIsDragging(false);
   };
 
-  // 3. Mouse Wheel to Zoom (Focal-point smooth zoom)
-  useEffect(() => {
+  // 3. Focal-point Zoom Function
+  const zoomAtPoint = useCallback((clientX: number, clientY: number, deltaY: number) => {
     const container = containerRef.current;
     if (!container) return;
 
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const rect = container.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+    const rect = container.getBoundingClientRect();
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
 
-      const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+    const currentScale = scaleRef.current;
+    const currentPan = panRef.current;
 
-      setScale((prevScale) => {
-        const newScale = Math.min(Math.max(prevScale * zoomFactor, 0.35), 2.5);
-        const actualFactor = newScale / prevScale;
+    // Zoom multiplier
+    const factor = deltaY < 0 ? 1.15 : 0.87;
+    const nextScale = Math.min(Math.max(currentScale * factor, 0.35), 2.5);
+    const actualFactor = nextScale / currentScale;
 
-        setPan((prevPan) => ({
-          x: mouseX - (mouseX - prevPan.x) * actualFactor,
-          y: mouseY - (mouseY - prevPan.y) * actualFactor,
-        }));
+    const nextPanX = mouseX - (mouseX - currentPan.x) * actualFactor;
+    const nextPanY = mouseY - (mouseY - currentPan.y) * actualFactor;
 
-        return Math.round(newScale * 100) / 100;
-      });
-    };
-
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-    };
+    setScale(Math.round(nextScale * 100) / 100);
+    setPan({ x: nextPanX, y: nextPanY });
   }, []);
+
+  // Native wheel listener for passive: false (prevents browser page scrolling)
+  const handleNativeWheel = useCallback(
+    (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      zoomAtPoint(e.clientX, e.clientY, e.deltaY);
+    },
+    [zoomAtPoint]
+  );
+
+  const nativeWheelRef = useRef(handleNativeWheel);
+  nativeWheelRef.current = handleNativeWheel;
+
+  // Callback ref: dynamically attaches when DOM element mounts
+  const setContainerRef = useCallback((node: HTMLDivElement | null) => {
+    if (containerRef.current) {
+      containerRef.current.removeEventListener('wheel', nativeWheelRef.current);
+    }
+    containerRef.current = node;
+    if (node) {
+      node.addEventListener('wheel', nativeWheelRef.current, { passive: false });
+    }
+  }, []);
+
+  // React onWheel fallback
+  const handleReactWheel = (e: React.WheelEvent) => {
+    zoomAtPoint(e.clientX, e.clientY, e.deltaY);
+  };
 
   // 4. Keyboard Shortcuts (Escape to exit fullscreen)
   useEffect(() => {
@@ -480,7 +510,8 @@ export const MindmapPage: React.FC = () => {
 
           {/* Fixed-Size Interactive Mindmap Canvas (User never needs to scroll the outer page) */}
           <div
-            ref={containerRef}
+            ref={setContainerRef}
+            onWheel={handleReactWheel}
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -519,6 +550,46 @@ export const MindmapPage: React.FC = () => {
                 </button>
               </div>
             )}
+
+            {/* Floating Zoom & View Controls inside Canvas (Bottom-Right) */}
+            <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 sm:p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg text-slate-600 dark:text-slate-300">
+              <button
+                type="button"
+                onClick={() => setScale((s) => Math.max(Math.round((s - 0.1) * 10) / 10, 0.35))}
+                className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                title="Thu nhỏ (-)"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-xs font-bold w-11 text-center select-none text-slate-800 dark:text-slate-200">
+                {Math.round(scale * 100)}%
+              </span>
+              <button
+                type="button"
+                onClick={() => setScale((s) => Math.min(Math.round((s + 0.1) * 10) / 10, 2.5))}
+                className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                title="Phóng to (+)"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-0.5" />
+              <button
+                type="button"
+                onClick={handleResetView}
+                className="p-1.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                title="Đặt lại 100%"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className="p-1.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                title={isFullscreen ? 'Thu nhỏ cửa sổ' : 'Toàn màn hình'}
+              >
+                {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+              </button>
+            </div>
 
             {/* Draggable & Zoomable Canvas Content Layer */}
             <div
