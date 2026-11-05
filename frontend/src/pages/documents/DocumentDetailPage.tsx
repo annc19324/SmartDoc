@@ -22,9 +22,11 @@ import {
   Eye,
   ExternalLink,
   AlertCircle,
+  Share2,
 } from 'lucide-react';
 import { FormattedText, cleanMarkdownText } from '../../components/common/FormattedText';
 import { formatFileType, formatFileSize } from '../../utils/formatters';
+import { ShareModal } from '../../components/common/ShareModal';
 
 export const DocumentDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +39,7 @@ export const DocumentDetailPage: React.FC = () => {
   const [contentSearch, setContentSearch] = useState('');
   const [pageFilter, setPageFilter] = useState<number | 'ALL'>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const { data: document, isLoading } = useQuery({
     queryKey: ['document', id],
@@ -281,7 +284,17 @@ export const DocumentDetailPage: React.FC = () => {
               <span>Tải về máy</span>
             </button>
 
-            {/* 3. Hỏi AI */}
+            {/* 3. Chia sẻ tài liệu */}
+            <button
+              onClick={() => setShowShareModal(true)}
+              title="Chia sẻ liên kết hoặc mã QR tài liệu"
+              className="px-5 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-sm sm:text-base font-semibold flex items-center gap-2.5 shadow-xs transition"
+            >
+              <Share2 className="w-5 h-5 text-indigo-600 shrink-0" />
+              <span>Chia sẻ</span>
+            </button>
+
+            {/* 4. Hỏi AI */}
             <button
               onClick={() => startChatMutation.mutate()}
               disabled={startChatMutation.isPending || document.status !== 'READY'}
@@ -721,6 +734,19 @@ export const DocumentDetailPage: React.FC = () => {
             </p>
           </div>
         </div>
+      )}
+
+      {/* Share Modal */}
+      {document && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          title="Tài liệu học tập"
+          itemTitle={document.title}
+          url={`/documents/${document.id}`}
+          type="document"
+          description={document.description}
+        />
       )}
     </div>
   );

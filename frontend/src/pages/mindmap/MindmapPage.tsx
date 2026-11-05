@@ -19,7 +19,9 @@ import {
   Move,
   Loader2,
   X,
+  Share2,
 } from 'lucide-react';
+import { ShareModal } from '../../components/common/ShareModal';
 
 // Color themes for Level 1 branches
 const branchThemes = [
@@ -170,6 +172,7 @@ export const MindmapPage: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showHelpPill, setShowHelpPill] = useState(true);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const treeRef = useRef<HTMLDivElement>(null);
@@ -465,6 +468,16 @@ export const MindmapPage: React.FC = () => {
                 )}
               </button>
 
+              {/* Share Mindmap Button */}
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="px-2.5 sm:px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-2xs"
+                title="Chia sẻ sơ đồ tư duy"
+              >
+                <Share2 className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Chia sẻ</span>
+              </button>
+
               <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block mx-0.5" />
 
               {/* Zoom Controls */}
@@ -670,6 +683,19 @@ export const MindmapPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Share Modal */}
+      {currentMindmap && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          title="Sơ đồ tư duy kiến thức"
+          itemTitle={currentMindmap.title}
+          url={currentMindmap.documentId ? `/mindmap?documentId=${currentMindmap.documentId}` : '/mindmap'}
+          type="mindmap"
+          description={`Sơ đồ tư duy kiến thức cho tài liệu: ${currentMindmap.document?.title || currentMindmap.title}`}
+        />
       )}
     </div>
   );

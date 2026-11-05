@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi, documentApi } from '../../services/api';
-import { BrainCircuit, Sparkles, Plus, Play, BookOpen, Layers, CheckCircle2 } from 'lucide-react';
+import { BrainCircuit, Sparkles, Plus, Play, BookOpen, Layers, CheckCircle2, Share2 } from 'lucide-react';
+import { ShareModal } from '../../components/common/ShareModal';
+import { Quiz } from '../../types';
 
 export const QuizListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +13,7 @@ export const QuizListPage: React.FC = () => {
   const docIdParam = searchParams.get('documentId') || '';
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [shareQuiz, setShareQuiz] = useState<Quiz | null>(null);
   const [selectedDocId, setSelectedDocId] = useState(docIdParam);
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState('MEDIUM');
@@ -124,13 +127,24 @@ export const QuizListPage: React.FC = () => {
                 <span className="text-[11px] text-slate-400 font-medium">
                   {quiz._count?.attempts || 0} lượt làm
                 </span>
-                <button
-                  onClick={() => navigate(`/quiz/${quiz.id}`)}
-                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold flex items-center gap-1 transition"
-                >
-                  <Play className="w-3.5 h-3.5" />
-                  <span>Bắt đầu thi</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setShareQuiz(quiz)}
+                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
+                    title="Chia sẻ bài thi / bài tập"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-indigo-600" />
+                    <span className="hidden sm:inline">Chia sẻ</span>
+                  </button>
+                  <button
+                    onClick={() => navigate(`/quiz/${quiz.id}`)}
+                    className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold flex items-center gap-1 transition"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    <span>Bắt đầu thi</span>
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -251,6 +265,19 @@ export const QuizListPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Share Modal */}
+      {shareQuiz && (
+        <ShareModal
+          isOpen={!!shareQuiz}
+          onClose={() => setShareQuiz(null)}
+          title="Bài tập / Bài thi trắc nghiệm"
+          itemTitle={shareQuiz.title}
+          url={`/quiz/${shareQuiz.id}`}
+          type="quiz"
+          description={shareQuiz.description || `Bài thi trắc nghiệm gồm ${shareQuiz.questions?.length || ''} câu hỏi`}
+        />
       )}
     </div>
   );

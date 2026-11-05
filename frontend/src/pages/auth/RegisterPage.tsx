@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Sparkles, ArrowRight, Lock, Mail, User, AlertCircle, GraduationCap, Eye, EyeOff, Home } from 'lucide-react';
 
@@ -18,6 +18,8 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export const RegisterPage: React.FC = () => {
   const { register: registerAuth } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/dashboard';
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +40,7 @@ export const RegisterPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       await registerAuth(data);
-      navigate('/dashboard');
+      navigate(redirect);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng ký không thành công.');
     } finally {

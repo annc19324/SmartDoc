@@ -12,13 +12,17 @@ import {
   Calendar,
   Layers,
   Sparkles,
+  Share2,
 } from 'lucide-react';
 import { formatFileType } from '../../utils/formatters';
+import { ShareModal } from '../../components/common/ShareModal';
+import { Document } from '../../types';
 
 export const DocumentListPage: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [shareDoc, setShareDoc] = useState<Document | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['documents', search, selectedCategory],
@@ -149,14 +153,40 @@ export const DocumentListPage: React.FC = () => {
                   <Eye className="w-4 h-4" />
                   {doc.viewCount} xem
                 </span>
-                <span className="flex items-center gap-1 text-indigo-600 font-semibold">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  AI RAG Ready
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:flex items-center gap-1 text-indigo-600 font-semibold">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    AI Ready
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShareDoc(doc);
+                    }}
+                    className="p-1 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    title="Chia sẻ tài liệu"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Share Modal */}
+      {shareDoc && (
+        <ShareModal
+          isOpen={!!shareDoc}
+          onClose={() => setShareDoc(null)}
+          title="Tài liệu học tập"
+          itemTitle={shareDoc.title}
+          url={`/documents/${shareDoc.id}`}
+          type="document"
+          description={shareDoc.description}
+        />
       )}
     </div>
   );
