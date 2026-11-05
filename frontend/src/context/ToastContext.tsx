@@ -62,8 +62,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         showToast({
           type: 'success',
           message: 'Đã sao chép liên kết chia sẻ vào bộ nhớ tạm!',
-          subMessage: subMessage || (title ? `Nội dung: ${title}` : fullUrl),
-          duration: 3500,
+          subMessage: subMessage || (title ? `${title}` : undefined),
+          duration: 3000,
         });
 
         return true;
@@ -72,8 +72,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         showToast({
           type: 'error',
           message: 'Không thể tự động sao chép liên kết.',
-          subMessage: 'Vui lòng sao chép thủ công từ ô hiển thị liên kết.',
-          duration: 3500,
+          subMessage: 'Trình duyệt không cho phép truy cập bộ nhớ tạm.',
+          duration: 3000,
         });
         return false;
       }
@@ -85,12 +85,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ showToast, copyAndNotify }}>
       {children}
 
-      {/* Floating Toasts Viewport Container */}
-      <div className="fixed top-5 right-4 sm:right-6 z-[100] flex flex-col gap-2.5 max-w-sm sm:max-w-md w-full pointer-events-none">
+      {/* Floating Toasts Viewport Container (Centered on mobile, right-aligned on desktop) */}
+      <div className="fixed top-5 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 z-[100] flex flex-col gap-2.5 max-w-[92vw] sm:max-w-md w-full pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-2xl shadow-xl border backdrop-blur-md transition-all duration-300 animate-in slide-in-from-top-3 fade-in ${
+            className={`pointer-events-auto flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl shadow-2xl border backdrop-blur-md transition-all duration-300 animate-in slide-in-from-top-3 fade-in ${
               toast.type === 'error'
                 ? 'bg-rose-50/95 dark:bg-rose-950/90 border-rose-200 dark:border-rose-900 text-rose-900 dark:text-rose-100'
                 : toast.type === 'info'
@@ -111,12 +111,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             <div className="flex-1 min-w-0">
               <p className="text-xs sm:text-sm font-bold leading-tight">{toast.message}</p>
               {toast.subMessage && (
-                <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1 line-clamp-2 leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1 line-clamp-1 leading-relaxed">
                   {toast.subMessage}
                 </p>
               )}
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">
-                Nhấn Ctrl+V để dán và gửi ngay
+              <span className="text-[10px] text-emerald-700/80 dark:text-emerald-300/80 mt-1 block font-medium">
+                Nhấn Ctrl + V để dán và gửi ngay
               </span>
             </div>
 

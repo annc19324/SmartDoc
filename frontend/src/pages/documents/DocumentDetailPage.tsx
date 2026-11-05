@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { FormattedText, cleanMarkdownText } from '../../components/common/FormattedText';
 import { formatFileType, formatFileSize } from '../../utils/formatters';
-import { ShareModal } from '../../components/common/ShareModal';
 import { useToast } from '../../context/ToastContext';
 
 export const DocumentDetailPage: React.FC = () => {
@@ -41,7 +40,6 @@ export const DocumentDetailPage: React.FC = () => {
   const [contentSearch, setContentSearch] = useState('');
   const [pageFilter, setPageFilter] = useState<number | 'ALL'>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
 
   const { data: document, isLoading } = useQuery({
     queryKey: ['document', id],
@@ -292,9 +290,8 @@ export const DocumentDetailPage: React.FC = () => {
                 if (document) {
                   copyAndNotify(`/documents/${document.id}`, document.title);
                 }
-                setShowShareModal(true);
               }}
-              title="Sao chép link & chia sẻ tài liệu"
+              title="Sao chép liên kết chia sẻ tài liệu"
               className="px-5 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-sm sm:text-base font-semibold flex items-center gap-2.5 shadow-xs transition"
             >
               <Share2 className="w-5 h-5 text-indigo-600 shrink-0" />
@@ -741,19 +738,6 @@ export const DocumentDetailPage: React.FC = () => {
             </p>
           </div>
         </div>
-      )}
-
-      {/* Share Modal */}
-      {document && (
-        <ShareModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          title="Tài liệu học tập"
-          itemTitle={document.title}
-          url={`/documents/${document.id}`}
-          type="document"
-          description={document.description}
-        />
       )}
     </div>
   );

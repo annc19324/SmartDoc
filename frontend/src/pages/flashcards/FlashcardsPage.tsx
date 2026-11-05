@@ -16,7 +16,6 @@ import {
   Share2,
 } from 'lucide-react';
 import { cleanMarkdownText } from '../../components/common/FormattedText';
-import { ShareModal } from '../../components/common/ShareModal';
 import { useToast } from '../../context/ToastContext';
 
 export const FlashcardsPage: React.FC = () => {
@@ -27,7 +26,6 @@ export const FlashcardsPage: React.FC = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [shareDeck, setShareDeck] = useState<FlashcardDeck | null>(null);
 
   // Form states for creating deck
   const [selectedDocId, setSelectedDocId] = useState('');
@@ -99,10 +97,9 @@ export const FlashcardsPage: React.FC = () => {
                     ? `/flashcards?documentId=${activeDeck.documentId}`
                     : '/flashcards';
                   copyAndNotify(url, activeDeck.title);
-                  setShareDeck(activeDeck);
                 }}
                 className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
-                title="Sao chép link & chia sẻ bộ Flashcards"
+                title="Sao chép liên kết chia sẻ bộ Flashcards"
               >
                 <Share2 className="w-4 h-4 text-cyan-600" />
                 <span>Chia sẻ</span>
@@ -268,10 +265,9 @@ export const FlashcardsPage: React.FC = () => {
                           ? `/flashcards?documentId=${deck.documentId}`
                           : '/flashcards';
                         copyAndNotify(url, deck.title);
-                        setShareDeck(deck);
                       }}
                       className="p-1 rounded-lg text-slate-400 hover:text-cyan-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                      title="Sao chép link & chia sẻ bộ Flashcards"
+                      title="Sao chép liên kết chia sẻ bộ Flashcards"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
@@ -371,19 +367,6 @@ export const FlashcardsPage: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Share Modal */}
-      {shareDeck && (
-        <ShareModal
-          isOpen={!!shareDeck}
-          onClose={() => setShareDeck(null)}
-          title="Bộ thẻ ghi nhớ Flashcards"
-          itemTitle={shareDeck.title}
-          url={shareDeck.documentId ? `/flashcards?documentId=${shareDeck.documentId}` : '/flashcards'}
-          type="flashcard"
-          description={shareDeck.description || `Bộ Flashcards gồm ${shareDeck.cards?.length || shareDeck._count?.cards || 0} thẻ ghi nhớ`}
-        />
       )}
     </div>
   );

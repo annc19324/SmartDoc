@@ -3,14 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi } from '../../services/api';
 import { StudyPlan, StudyPlanDay } from '../../types';
 import { CalendarCheck, Sparkles, Plus, Clock, Target, CheckCircle2, Circle, ArrowRight, Share2 } from 'lucide-react';
-import { ShareModal } from '../../components/common/ShareModal';
 import { useToast } from '../../context/ToastContext';
 
 export const StudyPlanPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { copyAndNotify } = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
 
   // Form states
   const [subject, setSubject] = useState('');
@@ -58,10 +56,9 @@ export const StudyPlanPage: React.FC = () => {
             <button
               onClick={() => {
                 copyAndNotify('/study-plan', `Kế hoạch học tập môn ${activePlan.subject}`);
-                setShowShareModal(true);
               }}
               className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition"
-              title="Sao chép link & chia sẻ lộ trình"
+              title="Sao chép liên kết chia sẻ lộ trình"
             >
               <Share2 className="w-4 h-4 text-indigo-600" />
               <span>Chia sẻ</span>
@@ -265,19 +262,6 @@ export const StudyPlanPage: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Share Modal */}
-      {activePlan && (
-        <ShareModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          title="Kế hoạch học tập AI"
-          itemTitle={`Lộ trình ôn thi môn ${activePlan.subject}`}
-          url="/study-plan"
-          type="summary"
-          description={`Lộ trình ôn thi môn ${activePlan.subject} với mục tiêu ${activePlan.targetScore}`}
-        />
       )}
     </div>
   );

@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi } from '../../services/api';
 import { QuizAttemptResult } from '../../types';
 import { BrainCircuit, CheckCircle2, XCircle, ArrowLeft, RotateCcw, Award, HelpCircle, Printer, Share2 } from 'lucide-react';
-import { ShareModal } from '../../components/common/ShareModal';
 import { useToast } from '../../context/ToastContext';
 
 export const QuizDetailPage: React.FC = () => {
@@ -15,7 +14,6 @@ export const QuizDetailPage: React.FC = () => {
 
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
 
   const { data: quiz, isLoading } = useQuery({
     queryKey: ['quizDetail', id],
@@ -99,10 +97,9 @@ export const QuizDetailPage: React.FC = () => {
                     `Kết quả bài Quiz: ${result.score}/10 (${result.correctCount}/${result.totalQuestions} câu đúng)`
                   );
                 }
-                setShowShareModal(true);
               }}
               className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition"
-              title="Sao chép link & chia sẻ kết quả"
+              title="Sao chép liên kết chia sẻ kết quả"
             >
               <Share2 className="w-4 h-4 text-indigo-600" />
               <span>Chia sẻ</span>
@@ -131,10 +128,9 @@ export const QuizDetailPage: React.FC = () => {
                 if (quiz) {
                   copyAndNotify(`/quiz/${quiz.id}`, quiz.title);
                 }
-                setShowShareModal(true);
               }}
               className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition no-print"
-              title="Sao chép link & chia sẻ bài thi này"
+              title="Sao chép liên kết chia sẻ bài thi này"
             >
               <Share2 className="w-4 h-4 text-indigo-600" />
               <span>Chia sẻ</span>
@@ -269,23 +265,6 @@ export const QuizDetailPage: React.FC = () => {
             )}
           </button>
         </div>
-      )}
-
-      {/* Share Modal */}
-      {quiz && (
-        <ShareModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          title="Bài thi trắc nghiệm"
-          itemTitle={quiz.title}
-          url={`/quiz/${quiz.id}`}
-          type="quiz"
-          description={
-            result
-              ? `Kết quả ôn tập bài thi ${quiz.title}: ${result.score}/10 (${result.correctCount}/${result.totalQuestions} câu đúng). Hãy thử làm bài kiểm tra!`
-              : quiz.description
-          }
-        />
       )}
     </div>
   );
