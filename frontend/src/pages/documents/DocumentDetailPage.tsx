@@ -27,11 +27,13 @@ import {
 import { FormattedText, cleanMarkdownText } from '../../components/common/FormattedText';
 import { formatFileType, formatFileSize } from '../../utils/formatters';
 import { ShareModal } from '../../components/common/ShareModal';
+import { useToast } from '../../context/ToastContext';
 
 export const DocumentDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { copyAndNotify } = useToast();
 
   // Tabs: default to 'content' (Đọc nội dung) so students immediately see the document
   const [activeTab, setActiveTab] = useState<'content' | 'overview' | 'summary' | 'tools'>('content');
@@ -286,8 +288,13 @@ export const DocumentDetailPage: React.FC = () => {
 
             {/* 3. Chia sẻ tài liệu */}
             <button
-              onClick={() => setShowShareModal(true)}
-              title="Chia sẻ liên kết hoặc mã QR tài liệu"
+              onClick={() => {
+                if (document) {
+                  copyAndNotify(`/documents/${document.id}`, document.title);
+                }
+                setShowShareModal(true);
+              }}
+              title="Sao chép link & chia sẻ tài liệu"
               className="px-5 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-sm sm:text-base font-semibold flex items-center gap-2.5 shadow-xs transition"
             >
               <Share2 className="w-5 h-5 text-indigo-600 shrink-0" />

@@ -34,10 +34,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   type = 'document',
   description,
 }) => {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(true);
   const [activeTab, setActiveTab] = useState<'link' | 'qr'>('link');
-
-  if (!isOpen) return null;
 
   // Resolve absolute URL
   const getFullUrl = () => {
@@ -48,6 +46,29 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   const fullUrl = getFullUrl();
   const displayTitle = itemTitle || title;
+
+  // Automatically copy to clipboard when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setCopied(true);
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(fullUrl);
+        } else {
+          const textArea = document.createElement('textarea');
+          textArea.value = fullUrl;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        }
+      } catch {
+        // Ignored
+      }
+    }
+  }, [isOpen, fullUrl]);
+
+  if (!isOpen) return null;
 
   // Handle Copy to Clipboard
   const handleCopy = async () => {
@@ -63,7 +84,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         document.body.removeChild(textArea);
       }
       setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      setTimeout(() => setCopied(false), 3000);
     } catch (err) {
       console.error('Không thể sao chép liên kết:', err);
     }
@@ -165,6 +186,16 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Auto-Copied Status Banner */}
+        <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs shadow-2xs">
+          <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
+            <Check className="w-3.5 h-3.5" />
+          </div>
+          <span className="leading-relaxed">
+            <strong>Đã tự động sao chép liên kết!</strong> Bạn có thể bấm <strong>Ctrl+V</strong> để dán và gửi ngay cho bạn bè hoặc sinh viên.
+          </span>
         </div>
 
         {/* Tab switch: Link vs QR Code */}

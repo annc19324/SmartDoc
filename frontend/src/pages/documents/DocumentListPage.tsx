@@ -16,10 +16,12 @@ import {
 } from 'lucide-react';
 import { formatFileType } from '../../utils/formatters';
 import { ShareModal } from '../../components/common/ShareModal';
+import { useToast } from '../../context/ToastContext';
 import { Document } from '../../types';
 
 export const DocumentListPage: React.FC = () => {
   const navigate = useNavigate();
+  const { copyAndNotify } = useToast();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [shareDoc, setShareDoc] = useState<Document | null>(null);
@@ -162,10 +164,11 @@ export const DocumentListPage: React.FC = () => {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
+                      copyAndNotify(`/documents/${doc.id}`, doc.title);
                       setShareDoc(doc);
                     }}
                     className="p-1 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                    title="Chia sẻ tài liệu"
+                    title="Sao chép link & chia sẻ tài liệu"
                   >
                     <Share2 className="w-4 h-4" />
                   </button>

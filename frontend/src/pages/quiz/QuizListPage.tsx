@@ -4,10 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi, documentApi } from '../../services/api';
 import { BrainCircuit, Sparkles, Plus, Play, BookOpen, Layers, CheckCircle2, Share2 } from 'lucide-react';
 import { ShareModal } from '../../components/common/ShareModal';
+import { useToast } from '../../context/ToastContext';
 import { Quiz } from '../../types';
 
 export const QuizListPage: React.FC = () => {
   const navigate = useNavigate();
+  const { copyAndNotify } = useToast();
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const docIdParam = searchParams.get('documentId') || '';
@@ -130,9 +132,12 @@ export const QuizListPage: React.FC = () => {
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={() => setShareQuiz(quiz)}
+                    onClick={() => {
+                      copyAndNotify(`/quiz/${quiz.id}`, quiz.title);
+                      setShareQuiz(quiz);
+                    }}
                     className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
-                    title="Chia sẻ bài thi / bài tập"
+                    title="Sao chép link & chia sẻ bài thi"
                   >
                     <Share2 className="w-3.5 h-3.5 text-indigo-600" />
                     <span className="hidden sm:inline">Chia sẻ</span>

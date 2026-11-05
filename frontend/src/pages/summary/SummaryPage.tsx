@@ -5,8 +5,10 @@ import { SummaryType } from '../../types';
 import { FileText, Sparkles, CheckCircle2, RefreshCw, BookOpen, Printer, Share2 } from 'lucide-react';
 import { FormattedText, cleanMarkdownText } from '../../components/common/FormattedText';
 import { ShareModal } from '../../components/common/ShareModal';
+import { useToast } from '../../context/ToastContext';
 
 export const SummaryPage: React.FC = () => {
+  const { copyAndNotify } = useToast();
   const [selectedDocId, setSelectedDocId] = useState<string>('');
   const [summaryType, setSummaryType] = useState<SummaryType>('DETAILED');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -149,9 +151,16 @@ export const SummaryPage: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setShowShareModal(true)}
+                onClick={() => {
+                  if (selectedDocId) {
+                    const docTitle =
+                      documents.find((d) => d.id === selectedDocId)?.title || 'Bản tóm tắt tài liệu';
+                    copyAndNotify(`/summary?documentId=${selectedDocId}`, docTitle);
+                  }
+                  setShowShareModal(true);
+                }}
                 className="px-3.5 py-2 sm:px-4 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition"
-                title="Chia sẻ bản tóm tắt học tập"
+                title="Sao chép link & chia sẻ bản tóm tắt học tập"
               >
                 <Share2 className="w-4 h-4 text-indigo-600" />
                 <span>Chia sẻ</span>

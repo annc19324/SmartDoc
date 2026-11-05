@@ -22,6 +22,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { ShareModal } from '../../components/common/ShareModal';
+import { useToast } from '../../context/ToastContext';
 
 // Color themes for Level 1 branches
 const branchThemes = [
@@ -160,6 +161,7 @@ const TreeNode: React.FC<{
 export const MindmapPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const { copyAndNotify } = useToast();
   const docIdParam = searchParams.get('documentId') || '';
 
   const [selectedDocId, setSelectedDocId] = useState(docIdParam);
@@ -470,9 +472,17 @@ export const MindmapPage: React.FC = () => {
 
               {/* Share Mindmap Button */}
               <button
-                onClick={() => setShowShareModal(true)}
+                onClick={() => {
+                  if (currentMindmap) {
+                    const shareUrl = currentMindmap.documentId
+                      ? `/mindmap?documentId=${currentMindmap.documentId}`
+                      : '/mindmap';
+                    copyAndNotify(shareUrl, currentMindmap.title);
+                  }
+                  setShowShareModal(true);
+                }}
                 className="px-2.5 sm:px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-2xs"
-                title="Chia sẻ sơ đồ tư duy"
+                title="Sao chép link & chia sẻ sơ đồ tư duy"
               >
                 <Share2 className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Chia sẻ</span>

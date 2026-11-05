@@ -17,9 +17,11 @@ import {
 } from 'lucide-react';
 import { cleanMarkdownText } from '../../components/common/FormattedText';
 import { ShareModal } from '../../components/common/ShareModal';
+import { useToast } from '../../context/ToastContext';
 
 export const FlashcardsPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const { copyAndNotify } = useToast();
 
   const [activeDeck, setActiveDeck] = useState<FlashcardDeck | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -92,9 +94,15 @@ export const FlashcardsPage: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setShareDeck(activeDeck)}
+                onClick={() => {
+                  const url = activeDeck.documentId
+                    ? `/flashcards?documentId=${activeDeck.documentId}`
+                    : '/flashcards';
+                  copyAndNotify(url, activeDeck.title);
+                  setShareDeck(activeDeck);
+                }}
                 className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
-                title="Chia sẻ bộ Flashcards"
+                title="Sao chép link & chia sẻ bộ Flashcards"
               >
                 <Share2 className="w-4 h-4 text-cyan-600" />
                 <span>Chia sẻ</span>
@@ -256,10 +264,14 @@ export const FlashcardsPage: React.FC = () => {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        const url = deck.documentId
+                          ? `/flashcards?documentId=${deck.documentId}`
+                          : '/flashcards';
+                        copyAndNotify(url, deck.title);
                         setShareDeck(deck);
                       }}
                       className="p-1 rounded-lg text-slate-400 hover:text-cyan-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                      title="Chia sẻ bộ Flashcards"
+                      title="Sao chép link & chia sẻ bộ Flashcards"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
