@@ -158,13 +158,23 @@ const TreeNode: React.FC<{
 };
 
 export const MindmapPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { copyAndNotify } = useToast();
   const docIdParam = searchParams.get('documentId') || '';
+  const mindmapIdParam = searchParams.get('id') || '';
 
   const [selectedDocId, setSelectedDocId] = useState(docIdParam);
+  const [activeMindmapId, setActiveMindmapId] = useState(mindmapIdParam);
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  useEffect(() => {
+    if (docIdParam) setSelectedDocId(docIdParam);
+  }, [docIdParam]);
+
+  useEffect(() => {
+    if (mindmapIdParam) setActiveMindmapId(mindmapIdParam);
+  }, [mindmapIdParam]);
 
   // Canvas Viewport Pan & Zoom State
   const [scale, setScale] = useState(1);
@@ -188,18 +198,29 @@ export const MindmapPage: React.FC = () => {
     queryFn: () => aiApi.listMindmaps(docIdParam || undefined),
   });
 
+  const { data: sharedMindmap, isLoading: loadingSharedMindmap } = useQuery({
+    queryKey: ['mindmapDetail', mindmapIdParam],
+    queryFn: () => aiApi.getMindmapById(mindmapIdParam),
+    enabled: !!mindmapIdParam,
+  });
+
   const { data: docsData } = useQuery({
     queryKey: ['documentsForMindmap'],
     queryFn: () => documentApi.list({ limit: 50, status: 'READY' }),
   });
 
   const availableDocs = docsData?.documents || [];
-  const currentMindmap = mindmaps[0];
+  const currentMindmap =
+    (activeMindmapId && mindmaps.find((m) => m.id === activeMindmapId)) ||
+    (mindmapIdParam && sharedMindmap ? sharedMindmap : undefined) ||
+    mindmaps[0];
 
   const generateMutation = useMutation({
     mutationFn: () => aiApi.generateMindmap(selectedDocId),
-    onSuccess: () => {
+    onSuccess: (created) => {
       setShowCreateModal(false);
+      setActiveMindmapId(created.id);
+      setSearchParams({ id: created.id, ...(created.documentId ? { documentId: created.documentId } : {}) });
       queryClient.invalidateQueries({ queryKey: ['mindmaps'] });
     },
   });
@@ -415,7 +436,7 @@ export const MindmapPage: React.FC = () => {
       )}
 
       {/* Main Canvas View */}
-      {isLoading ? (
+      {isLoading || loadingSharedMindmap ? (
         <div className="py-20 text-center text-sm text-slate-400">Đang tải sơ đồ tư duy...</div>
       ) : !currentMindmap ? (
         <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
@@ -473,8 +494,8 @@ export const MindmapPage: React.FC = () => {
                 onClick={() => {
                   if (currentMindmap) {
                     const shareUrl = currentMindmap.documentId
-                      ? `/mindmap?documentId=${currentMindmap.documentId}`
-                      : '/mindmap';
+                      ? `/mindmap?id=${currentMindmap.id}&documentId=${currentMindmap.documentId}`
+                      : `/mindmap?id=${currentMindmap.id}`;
                     copyAndNotify(shareUrl, currentMindmap.title);
                   }
                 }}

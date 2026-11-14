@@ -52,11 +52,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
   }, []);
 
   const { data: notifications = [], refetch } = useQuery({
-    queryKey: ['notifications'],
+    queryKey: ['notifications', user?.id],
     queryFn: () => systemApi.listNotifications(),
+    enabled: !!user,
   });
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = user ? notifications.filter((n) => !n.isRead).length : 0;
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,8 +73,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
 
   const handleLogout = async () => {
     setShowUserMenu(false);
+    navigate('/login', { replace: true });
     await logout();
-    navigate('/login');
   };
 
   const getRoleLabel = (role?: string) => {
@@ -126,7 +127,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
           <span>Tải tài liệu</span>
         </button>
 
-        {/* Notification Bell Dropdown */}
+        {/* Notification Bell Dropdown (Only for authenticated users) */}
+        {user && (
         <div className="relative" ref={notificationRef}>
           <button
             onClick={() => {
@@ -187,7 +189,15 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
                     notifications.map((item) => (
                       <div
                         key={item.id}
-                        onClick={() => {
+                        onClick={async () => {
+                          if (!item.isRead) {
+                            try {
+                              await systemApi.markNotificationAsRead(item.id);
+                              refetch();
+                            } catch {
+                              // ignore
+                            }
+                          }
                           if (item.link) {
                             navigate(item.link);
                             setShowNotifications(false);
@@ -223,10 +233,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar }) => {
             </>
           )}
         </div>
+        )}
 
-        {/* Top Right User Profile Dropdown (Hidden on mobile phones, visible from tablet up) */}
+        {/* Top Right User Profile Dropdown */}
         {user ? (
-          <div className="hidden sm:block relative pl-3 border-l border-slate-200 dark:border-slate-800" ref={userMenuRef}>
+          <div className="relative pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-800" ref={userMenuRef}>
             <button
               onClick={() => {
                 setShowUserMenu((prev) => !prev);

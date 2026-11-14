@@ -145,8 +145,8 @@ export const aiApi = {
     const res = await apiClient.post('/ai/flashcards/generate', payload);
     return res.data.data;
   },
-  listFlashcardDecks: async (): Promise<FlashcardDeck[]> => {
-    const res = await apiClient.get('/ai/flashcards/decks');
+  listFlashcardDecks: async (documentId?: string): Promise<FlashcardDeck[]> => {
+    const res = await apiClient.get('/ai/flashcards/decks', { params: documentId ? { documentId } : undefined });
     return res.data.data;
   },
   getFlashcardDeckById: async (id: string): Promise<FlashcardDeck> => {
@@ -161,6 +161,10 @@ export const aiApi = {
   },
   getStudyPlans: async (): Promise<StudyPlan[]> => {
     const res = await apiClient.get('/ai/study-plans');
+    return res.data.data;
+  },
+  getStudyPlanById: async (id: string): Promise<StudyPlan> => {
+    const res = await apiClient.get(`/ai/study-plans/${id}`);
     return res.data.data;
   },
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiClient } from '../../services/api/client';
 import { SettingsNav } from './SettingsNav';
@@ -12,11 +12,18 @@ import {
 } from 'lucide-react';
 
 export const ProfileSettingsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [avatar, setAvatar] = useState(user?.avatar || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      setFullName((prev) => prev || user.fullName || '');
+      setAvatar((prev) => prev || user.avatar || '');
+    }
+  }, [user]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -57,7 +64,12 @@ export const ProfileSettingsPage: React.FC = () => {
 
     try {
       setIsLoading(true);
-      await apiClient.put('/auth/profile', { fullName, avatar });
+      const res = await apiClient.put('/auth/profile', { fullName, avatar });
+      if (res.data?.data) {
+        updateUser(res.data.data);
+      } else {
+        updateUser({ fullName: fullName.trim(), avatar });
+      }
       setSuccessMessage('Cập nhật thông tin cá nhân thành công!');
     } catch (err: any) {
       setErrorMessage(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật.');

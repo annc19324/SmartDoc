@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi } from '../../services/api';
 import { StudyPlan, StudyPlanDay } from '../../types';
@@ -8,7 +9,15 @@ import { useToast } from '../../context/ToastContext';
 export const StudyPlanPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { copyAndNotify } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const planIdParam = searchParams.get('id') || '';
+
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>(planIdParam);
+
+  useEffect(() => {
+    if (planIdParam) setSelectedPlanId(planIdParam);
+  }, [planIdParam]);
 
   // Form states
   const [subject, setSubject] = useState('');
@@ -22,6 +31,12 @@ export const StudyPlanPage: React.FC = () => {
     queryFn: () => aiApi.getStudyPlans(),
   });
 
+  const { data: sharedPlan, isLoading: loadingSharedPlan } = useQuery({
+    queryKey: ['studyPlanDetail', planIdParam],
+    queryFn: () => aiApi.getStudyPlanById(planIdParam),
+    enabled: !!planIdParam,
+  });
+
   const createPlanMutation = useMutation({
     mutationFn: () =>
       aiApi.generateStudyPlan({
@@ -31,13 +46,18 @@ export const StudyPlanPage: React.FC = () => {
         availableHoursPerDay: availableHours,
         currentLevel,
       }),
-    onSuccess: () => {
+    onSuccess: (created) => {
       setShowCreateModal(false);
+      setSelectedPlanId(created.id);
+      setSearchParams({ id: created.id });
       queryClient.invalidateQueries({ queryKey: ['studyPlans'] });
     },
   });
 
-  const activePlan = plans[0];
+  const activePlan =
+    (selectedPlanId && plans.find((p) => p.id === selectedPlanId)) ||
+    (planIdParam && sharedPlan ? sharedPlan : undefined) ||
+    plans[0];
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-12">
@@ -55,7 +75,7 @@ export const StudyPlanPage: React.FC = () => {
           {activePlan && (
             <button
               onClick={() => {
-                copyAndNotify('/study-plan', `Kế hoạch học tập môn ${activePlan.subject}`);
+                copyAndNotify(`/study-plan?id=${activePlan.id}`, `Kế hoạch học tập môn ${activePlan.subject}`);
               }}
               className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition"
               title="Sao chép liên kết chia sẻ lộ trình"
@@ -74,7 +94,7 @@ export const StudyPlanPage: React.FC = () => {
         </div>
       </div>
 
-      {isLoading ? (
+      {isLoading || loadingSharedPlan ? (
         <div className="py-20 text-center text-xs text-slate-400">Đang tải kế hoạch học tập...</div>
       ) : !activePlan ? (
         <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8">
@@ -92,6 +112,28 @@ export const StudyPlanPage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Switch between multiple plans if user has > 1 */}
+          {plans.length > 1 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              {plans.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    setSelectedPlanId(p.id);
+                    setSearchParams({ id: p.id });
+                  }}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                    activePlan.id === p.id
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-indigo-400'
+                  }`}
+                >
+                  {p.subject}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Active Plan Overview */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

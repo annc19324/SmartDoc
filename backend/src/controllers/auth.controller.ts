@@ -49,7 +49,8 @@ export class AuthController {
       const user = await AuthService.getMe(req.user!.userId);
       return successResponse(res, user, 'Lấy thông tin người dùng thành công');
     } catch (error: any) {
-      return errorResponse(res, error.message, 404);
+      const status = error.statusCode || 401;
+      return errorResponse(res, error.message, status);
     }
   }
 
@@ -102,7 +103,8 @@ export class AuthController {
 
   static async logoutAllSessions(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await AuthService.logoutAllSessions(req.user!.userId);
+      const { refreshToken } = req.body || {};
+      const result = await AuthService.logoutAllSessions(req.user!.userId, refreshToken);
       return successResponse(res, result, 'Đã đăng xuất khỏi tất cả các thiết bị khác');
     } catch (error: any) {
       return errorResponse(res, error.message, 500);

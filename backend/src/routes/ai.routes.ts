@@ -4,11 +4,13 @@ import { authenticate } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
+// Public read-only summaries on Document Detail page
+router.get('/summary/:documentId', AIController.getDocumentSummaries);
+
 router.use(authenticate);
 
-// Summaries
+// Summaries (Protected generation)
 router.post('/summary', AIController.generateSummary);
-router.get('/summary/:documentId', AIController.getDocumentSummaries);
 
 // Quizzes
 router.post('/quiz/generate', AIController.generateQuiz);
@@ -29,6 +31,7 @@ router.get('/flashcards/decks/:id', AIController.getFlashcardDeckById);
 // Study Plan
 router.post('/study-plan/generate', AIController.generateStudyPlan);
 router.get('/study-plans', AIController.getStudyPlans);
+router.get('/study-plans/:id', AIController.getStudyPlanById);
 
 // Analytics & Recommendation
 router.get('/analytics', AIController.getAnalytics);

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi, documentApi } from '../../services/api';
 import { FlashcardDeck, Flashcard } from '../../types';
@@ -21,6 +22,9 @@ import { useToast } from '../../context/ToastContext';
 export const FlashcardsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { copyAndNotify } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deckIdParam = searchParams.get('deckId') || '';
+  const docIdParam = searchParams.get('documentId') || '';
 
   const [activeDeck, setActiveDeck] = useState<FlashcardDeck | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -28,13 +32,32 @@ export const FlashcardsPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Form states for creating deck
-  const [selectedDocId, setSelectedDocId] = useState('');
+  const [selectedDocId, setSelectedDocId] = useState(docIdParam);
   const [cardCount, setCardCount] = useState(6);
   const [deckTitle, setDeckTitle] = useState('');
 
+  useEffect(() => {
+    if (docIdParam) {
+      setSelectedDocId(docIdParam);
+    }
+  }, [docIdParam]);
+
+  useEffect(() => {
+    if (deckIdParam) {
+      aiApi
+        .getFlashcardDeckById(deckIdParam)
+        .then((fullDeck) => {
+          setActiveDeck(fullDeck);
+          setCurrentCardIndex(0);
+          setIsFlipped(false);
+        })
+        .catch(() => {});
+    }
+  }, [deckIdParam]);
+
   const { data: decks = [], isLoading: loadingDecks } = useQuery({
-    queryKey: ['flashcardDecks'],
-    queryFn: () => aiApi.listFlashcardDecks(),
+    queryKey: ['flashcardDecks', docIdParam],
+    queryFn: () => aiApi.listFlashcardDecks(docIdParam || undefined),
   });
 
   const { data: docsData } = useQuery({
@@ -78,7 +101,12 @@ export const FlashcardsPage: React.FC = () => {
       {activeDeck ? (
         <div className="space-y-6">
           <button
-            onClick={() => setActiveDeck(null)}
+            onClick={() => {
+              setActiveDeck(null);
+              if (deckIdParam) {
+                setSearchParams(docIdParam ? { documentId: docIdParam } : {});
+              }
+            }}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -93,9 +121,7 @@ export const FlashcardsPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
-                  const url = activeDeck.documentId
-                    ? `/flashcards?documentId=${activeDeck.documentId}`
-                    : '/flashcards';
+                  const url = `/flashcards?deckId=${activeDeck.id}`;
                   copyAndNotify(url, activeDeck.title);
                 }}
                 className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
@@ -261,9 +287,7 @@ export const FlashcardsPage: React.FC = () => {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const url = deck.documentId
-                          ? `/flashcards?documentId=${deck.documentId}`
-                          : '/flashcards';
+                        const url = `/flashcards?deckId=${deck.id}`;
                         copyAndNotify(url, deck.title);
                       }}
                       className="p-1 rounded-lg text-slate-400 hover:text-cyan-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"

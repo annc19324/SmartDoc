@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
+import { GuestRoute } from './GuestRoute';
 import { RoleRoute } from './RoleRoute';
 import { MainLayout } from '../components/layout/MainLayout';
 
@@ -32,10 +33,12 @@ import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
 export const AppRouter: React.FC = () => {
   return (
     <Routes>
-      {/* Public Auth Routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      {/* Guest-Only Auth Routes (Tự động chuyển về trang chủ nếu đã đăng nhập) */}
+      <Route element={<GuestRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      </Route>
 
       {/* Main Application with Sidebar & Header */}
       <Route element={<MainLayout />}>

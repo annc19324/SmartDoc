@@ -31,13 +31,15 @@ export const DashboardPage: React.FC = () => {
   });
 
   const { data: chatSessions = [] } = useQuery({
-    queryKey: ['recentChats'],
+    queryKey: ['recentChats', user?.id],
     queryFn: () => chatApi.listSessions(),
+    enabled: !!user,
   });
 
   const { data: analyticsData } = useQuery({
-    queryKey: ['userAnalytics'],
+    queryKey: ['userAnalytics', user?.id],
     queryFn: () => aiApi.getAnalytics(),
+    enabled: !!user,
   });
 
   // AI Recommendation mutation
@@ -58,12 +60,18 @@ export const DashboardPage: React.FC = () => {
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-cyan-200 mb-2 sm:mb-3 border border-white/10">
             <img src="/ai-logo.png" alt="SmartDoc AI" className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0" />
-            <span>SmartDoc • Nền tảng Học tập Thông minh</span>
+            <span>
+              {user
+                ? `Xin chào, ${user.fullName} • Đã đăng nhập`
+                : 'SmartDoc • Nền tảng Học tập Thông minh'}
+            </span>
           </div>
 
           {/* Heading text with comfortable, readable font size */}
-          <h1 className="hidden sm:block text-base sm:text-lg md:text-xl font-medium leading-relaxed max-w-2xl text-indigo-50">
-            Hãy tải lên giáo trình hoặc đặt câu hỏi trực tiếp để SmartDoc AI trích dẫn và phân tích ngay.
+          <h1 className="text-sm sm:text-lg md:text-xl font-semibold leading-relaxed max-w-2xl text-indigo-50">
+            {user
+              ? 'Chào mừng bạn quay trở lại! Hãy tải lên giáo trình hoặc đặt câu hỏi trực tiếp để SmartDoc AI trích dẫn và phân tích ngay.'
+              : 'Hãy tải lên giáo trình hoặc đặt câu hỏi trực tiếp để SmartDoc AI trích dẫn và phân tích ngay.'}
           </h1>
 
           {/* Quick Action Buttons: 4 compact columns on phone, flex row on tablet/desktop */}
@@ -117,7 +125,8 @@ export const DashboardPage: React.FC = () => {
             <Clock className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-indigo-500" />
           </div>
           <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
-            {analytics?.totalStudyMinutes || 120} <span className="text-xs sm:text-base font-semibold text-slate-400">phút</span>
+            {user ? (analytics?.totalStudyMinutes ?? 0) : 0}{' '}
+            <span className="text-xs sm:text-base font-semibold text-slate-400">phút</span>
           </p>
         </div>
 
@@ -127,7 +136,8 @@ export const DashboardPage: React.FC = () => {
             <TrendingUp className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-emerald-500" />
           </div>
           <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
-            {analytics?.averageQuizScore || 8.0} <span className="text-xs sm:text-base font-semibold text-slate-400">/ 10</span>
+            {user ? (analytics?.averageQuizScore ?? 0) : 0}{' '}
+            <span className="text-xs sm:text-base font-semibold text-slate-400">/ 10</span>
           </p>
         </div>
 
@@ -137,17 +147,21 @@ export const DashboardPage: React.FC = () => {
             <CheckCircle2 className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-cyan-500" />
           </div>
           <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
-            {analytics?.flashcardsReviewed || 25} <span className="text-xs sm:text-base font-semibold text-slate-400">thẻ</span>
+            {user ? (analytics?.flashcardsReviewed ?? 0) : 0}{' '}
+            <span className="text-xs sm:text-base font-semibold text-slate-400">thẻ</span>
           </p>
         </div>
 
         <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs sm:text-sm font-semibold">Tài liệu đã học</span>
+            <span className="text-xs sm:text-sm font-semibold">
+              {user ? 'Tài liệu đã học' : 'Tài liệu công khai'}
+            </span>
             <BookOpen className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-amber-500" />
           </div>
           <p className="mt-2 sm:mt-3 text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
-            {analytics?.documentsViewed || 4} <span className="text-xs sm:text-base font-semibold text-slate-400">tài liệu</span>
+            {user ? (analytics?.documentsViewed ?? recentDocs.length) : (docsData?.pagination?.total ?? recentDocs.length)}{' '}
+            <span className="text-xs sm:text-base font-semibold text-slate-400">tài liệu</span>
           </p>
         </div>
       </div>
@@ -263,15 +277,23 @@ export const DashboardPage: React.FC = () => {
               </button>
             </div>
             <div className="space-y-2">
-              {chatSessions.slice(0, 3).map((s) => (
-                <div
-                  key={s.id}
-                  onClick={() => navigate(`/chat?session=${s.id}`)}
-                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 cursor-pointer transition text-xs font-medium text-slate-700 dark:text-slate-300 truncate"
-                >
-                  💬 {s.title}
-                </div>
-              ))}
+              {user && chatSessions.length > 0 ? (
+                chatSessions.slice(0, 3).map((s) => (
+                  <div
+                    key={s.id}
+                    onClick={() => navigate(`/chat?session=${s.id}`)}
+                    className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 cursor-pointer transition text-xs font-medium text-slate-700 dark:text-slate-300 truncate"
+                  >
+                    💬 {s.title}
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-slate-400 py-2">
+                  {user
+                    ? 'Chưa có phiên hỏi đáp nào. Bấm "Mở Chat" để bắt đầu!'
+                    : 'Đăng nhập để lưu lịch sử trò chuyện cùng trợ lý RAG AI.'}
+                </p>
+              )}
             </div>
           </div>
         </div>

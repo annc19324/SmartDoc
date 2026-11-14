@@ -54,8 +54,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleLogout = async () => {
+    onCloseMobile?.();
+    navigate('/login', { replace: true });
     await logout();
-    navigate('/login');
   };
 
   const navItemClass = ({ isActive }: { isActive: boolean }) =>

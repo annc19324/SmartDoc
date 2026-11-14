@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { documentApi, aiApi } from '../../services/api';
 import { SummaryType } from '../../types';
@@ -8,8 +9,18 @@ import { useToast } from '../../context/ToastContext';
 
 export const SummaryPage: React.FC = () => {
   const { copyAndNotify } = useToast();
-  const [selectedDocId, setSelectedDocId] = useState<string>('');
-  const [summaryType, setSummaryType] = useState<SummaryType>('DETAILED');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const docIdParam = searchParams.get('documentId') || '';
+  const typeParam = (searchParams.get('type') as SummaryType) || 'DETAILED';
+
+  const [selectedDocId, setSelectedDocId] = useState<string>(docIdParam);
+  const [summaryType, setSummaryType] = useState<SummaryType>(typeParam);
+
+  useEffect(() => {
+    if (docIdParam && docIdParam !== selectedDocId) {
+      setSelectedDocId(docIdParam);
+    }
+  }, [docIdParam]);
 
   const { data: docsData } = useQuery({
     queryKey: ['documentsListForSummary'],
@@ -60,7 +71,15 @@ export const SummaryPage: React.FC = () => {
             </label>
             <select
               value={selectedDocId}
-              onChange={(e) => setSelectedDocId(e.target.value)}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                setSelectedDocId(nextId);
+                if (nextId) {
+                  setSearchParams({ documentId: nextId, type: summaryType });
+                } else {
+                  setSearchParams({});
+                }
+              }}
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer"
             >
               <option value="">-- Chọn tài liệu trong thư viện --</option>
@@ -153,7 +172,7 @@ export const SummaryPage: React.FC = () => {
                   if (selectedDocId) {
                     const docTitle =
                       documents.find((d) => d.id === selectedDocId)?.title || 'Bản tóm tắt tài liệu';
-                    copyAndNotify(`/summary?documentId=${selectedDocId}`, docTitle);
+                    copyAndNotify(`/summary?documentId=${selectedDocId}&type=${currentSummary.type}`, docTitle);
                   }
                 }}
                 className="px-3.5 py-2 sm:px-4 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition"

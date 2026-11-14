@@ -236,13 +236,31 @@ export class AuthService {
         include: { user: true },
       });
 
-      if (stored && stored.expiresAt >= new Date()) {
+      if (stored) {
+        if (stored.expiresAt < new Date()) {
+          await prisma.refreshToken.delete({ where: { id: stored.id } }).catch(() => {});
+          throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        }
         user = stored.user;
-        await prisma.refreshToken.delete({ where: { id: stored.id } });
+        await prisma.refreshToken.delete({ where: { id: stored.id } }).catch(() => {});
+      } else {
+        // Fallback lookup user in DB (handles near-simultaneous refresh requests gracefully)
+        user = await prisma.user.findUnique({
+          where: { id: decoded.userId },
+        });
       }
-    } catch (e) {
+    } catch (e: any) {
+      if (e?.message?.includes('hết hạn')) {
+        throw e;
+      }
       console.warn('Prisma refresh fallback:', e);
     }
+
+    if (user && user.isActive === false) {
+      throw new Error('Tài khoản đã bị tạm khóa. Vui lòng liên hệ Admin.');
+    }
+
+    const demoFallback = Object.values(mockDemoUsers).find((u) => u.id === decoded.userId || u.email === decoded.email);
 
     const payload = {
       userId: user?.id || decoded.userId,
@@ -252,13 +270,29 @@ export class AuthService {
     const newAccessToken = generateAccessToken(payload);
     const newRefreshToken = generateRefreshToken(payload);
 
+    // Persist rotated refresh token in DB when user exists in DB
+    if (user?.id) {
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      try {
+        await prisma.refreshToken.create({
+          data: {
+            userId: user.id,
+            token: newRefreshToken,
+            expiresAt,
+          },
+        });
+      } catch (saveErr) {
+        console.warn('Could not persist rotated refresh token:', saveErr);
+      }
+    }
+
     return {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
       user: {
         id: payload.userId,
         email: payload.email,
-        fullName: user?.fullName || payload.email.split('@')[0],
+        fullName: user?.fullName || demoFallback?.fullName || payload.email.split('@')[0],
         role: payload.role,
         avatar: user?.avatar || null,
       },
@@ -277,8 +311,11 @@ export class AuthService {
   }
 
   static async getMe(userId: string) {
+    let dbUser: any = null;
+    let dbReachable = true;
+
     try {
-      const user = await prisma.user.findUnique({
+      dbUser = await prisma.user.findUnique({
         where: { id: userId },
         select: {
           id: true,
@@ -286,22 +323,52 @@ export class AuthService {
           fullName: true,
           role: true,
           avatar: true,
+          isActive: true,
           createdAt: true,
         },
       });
-      if (user) return user;
     } catch (e) {
+      dbReachable = false;
       console.warn('DB getMe fallback');
     }
 
-    return {
-      id: userId,
-      email: 'student@smartdoc.edu.vn',
-      fullName: 'Trần Văn Sinh Viên',
-      role: Role.STUDENT,
-      avatar: null,
-      createdAt: new Date(),
-    };
+    if (dbUser) {
+      if (dbUser.isActive === false) {
+        const err: any = new Error('Tài khoản đã bị tạm khóa.');
+        err.statusCode = 403;
+        throw err;
+      }
+      const { isActive: _isActive, ...safeUser } = dbUser;
+      return safeUser;
+    }
+
+    // Check if userId belongs to a known demo user
+    const demoUser = Object.values(mockDemoUsers).find((u) => u.id === userId);
+    if (demoUser) {
+      return {
+        id: demoUser.id,
+        email: demoUser.email,
+        fullName: demoUser.fullName,
+        role: demoUser.role,
+        avatar: null,
+        createdAt: new Date(),
+      };
+    }
+
+    if (!dbReachable || userId.startsWith('mock-') || userId.startsWith('demo-')) {
+      return {
+        id: userId,
+        email: 'student@smartdoc.edu.vn',
+        fullName: 'Trần Văn Sinh Viên',
+        role: Role.STUDENT,
+        avatar: null,
+        createdAt: new Date(),
+      };
+    }
+
+    const notFoundErr: any = new Error('Không tìm thấy tài khoản người dùng.');
+    notFoundErr.statusCode = 401;
+    throw notFoundErr;
   }
 
   /**
@@ -436,9 +503,14 @@ export class AuthService {
   /**
    * Logout from all other active sessions
    */
-  static async logoutAllSessions(userId: string) {
+  static async logoutAllSessions(userId: string, currentRefreshToken?: string) {
     try {
-      await prisma.refreshToken.deleteMany({ where: { userId } });
+      await prisma.refreshToken.deleteMany({
+        where: {
+          userId,
+          ...(currentRefreshToken ? { token: { not: currentRefreshToken } } : {}),
+        },
+      });
     } catch (e) {
       console.warn('DB delete refresh tokens fallback');
     }

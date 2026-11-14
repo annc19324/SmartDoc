@@ -27,12 +27,15 @@ import {
 import { FormattedText, cleanMarkdownText } from '../../components/common/FormattedText';
 import { formatFileType, formatFileSize } from '../../utils/formatters';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../services/api/client';
 
 export const DocumentDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { copyAndNotify } = useToast();
+  const { user } = useAuth();
 
   // Tabs: default to 'content' (Đọc nội dung) so students immediately see the document
   const [activeTab, setActiveTab] = useState<'content' | 'overview' | 'summary' | 'tools'>('content');
@@ -77,6 +80,14 @@ export const DocumentDetailPage: React.FC = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const requireAuthOrRun = (action: () => void) => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(`/documents/${id}`)}`);
+      return;
+    }
+    action();
+  };
+
   // Direct download handler ensuring correct binary download with .docx or .pdf extension
   const handleDownloadFile = () => {
     if (!document) return;
@@ -93,7 +104,8 @@ export const DocumentDetailPage: React.FC = () => {
       .replace(/\.[^/.]+$/, '');
     const filename = `${safeTitle}.${ext}`;
 
-    const downloadApiUrl = `/api/documents/${document.id}/download`;
+    const cleanApiBase = API_BASE_URL.replace(/\/$/, '');
+    const downloadApiUrl = `${cleanApiBase}/documents/${document.id}/download`;
 
     // Fetch binary blob to force browser to save with exact file extension
     fetch(downloadApiUrl)
@@ -300,7 +312,7 @@ export const DocumentDetailPage: React.FC = () => {
 
             {/* 4. Hỏi AI */}
             <button
-              onClick={() => startChatMutation.mutate()}
+              onClick={() => requireAuthOrRun(() => startChatMutation.mutate())}
               disabled={startChatMutation.isPending || document.status !== 'READY'}
               className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-2xl text-sm font-bold flex items-center gap-2 shadow-sm transition"
             >
@@ -592,7 +604,7 @@ export const DocumentDetailPage: React.FC = () => {
               </p>
               <div className="space-y-2.5">
                 <button
-                  onClick={() => generateSummaryMutation.mutate('DETAILED')}
+                  onClick={() => requireAuthOrRun(() => generateSummaryMutation.mutate('DETAILED'))}
                   disabled={generateSummaryMutation.isPending}
                   className="w-full py-2.5 px-3.5 bg-white dark:bg-slate-800 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:text-indigo-600 flex items-center justify-between transition"
                 >
@@ -635,7 +647,7 @@ export const DocumentDetailPage: React.FC = () => {
               <span>Bản tóm tắt nội dung học tập</span>
             </h2>
             <button
-              onClick={() => generateSummaryMutation.mutate('DETAILED')}
+              onClick={() => requireAuthOrRun(() => generateSummaryMutation.mutate('DETAILED'))}
               disabled={generateSummaryMutation.isPending}
               className="px-3.5 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 hover:bg-indigo-100 transition"
             >
@@ -648,7 +660,7 @@ export const DocumentDetailPage: React.FC = () => {
             <div className="text-center py-12">
               <p className="text-xs sm:text-sm text-slate-400 mb-3">Tài liệu này chưa có bản tóm tắt nào.</p>
               <button
-                onClick={() => generateSummaryMutation.mutate('DETAILED')}
+                onClick={() => requireAuthOrRun(() => generateSummaryMutation.mutate('DETAILED'))}
                 disabled={generateSummaryMutation.isPending}
                 className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-semibold shadow-sm transition"
               >

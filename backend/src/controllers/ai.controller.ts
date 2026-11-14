@@ -124,10 +124,9 @@ export class AIController {
     try {
       const { documentId } = req.query;
       const mindmaps = await prisma.mindmap.findMany({
-        where: {
-          userId: req.user!.userId,
-          ...(documentId && { documentId: documentId as string }),
-        },
+        where: documentId
+          ? { documentId: documentId as string }
+          : { userId: req.user!.userId },
         include: { document: { select: { id: true, title: true } } },
         orderBy: { updatedAt: 'desc' },
       });
@@ -172,8 +171,11 @@ export class AIController {
 
   static async listFlashcardDecks(req: Request, res: Response, next: NextFunction) {
     try {
+      const { documentId } = req.query;
       const decks = await prisma.flashcardDeck.findMany({
-        where: { userId: req.user!.userId },
+        where: documentId
+          ? { documentId: documentId as string }
+          : { userId: req.user!.userId },
         include: {
           document: { select: { id: true, title: true } },
           _count: { select: { cards: true } },
@@ -230,6 +232,19 @@ export class AIController {
         orderBy: { createdAt: 'desc' },
       });
       return successResponse(res, plans, 'Danh sách kế hoạch học tập');
+    } catch (error: any) {
+      return errorResponse(res, error.message, 500);
+    }
+  }
+
+  static async getStudyPlanById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params as { id: string };
+      const plan = await prisma.studyPlan.findUnique({
+        where: { id },
+      });
+      if (!plan) return errorResponse(res, 'Không tìm thấy kế hoạch học tập', 404);
+      return successResponse(res, plan, 'Chi tiết kế hoạch học tập');
     } catch (error: any) {
       return errorResponse(res, error.message, 500);
     }

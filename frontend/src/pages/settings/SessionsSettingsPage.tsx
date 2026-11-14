@@ -28,7 +28,8 @@ export const SessionsSettingsPage: React.FC = () => {
 
     try {
       setIsLoading(true);
-      await apiClient.post('/auth/logout-all');
+      const currentRefreshToken = localStorage.getItem('smartdoc_refresh_token');
+      await apiClient.post('/auth/logout-all', { refreshToken: currentRefreshToken });
       setSuccessMessage('Đã đăng xuất tài khoản khỏi tất cả các thiết bị khác thành công.');
     } catch (err: any) {
       setErrorMessage(err.response?.data?.message || 'Có lỗi xảy ra khi đăng xuất thiết bị.');

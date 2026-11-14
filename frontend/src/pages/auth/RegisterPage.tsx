@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { sanitizeRedirectPath } from '../../routes/GuestRoute';
 import { Sparkles, ArrowRight, Lock, Mail, User, AlertCircle, GraduationCap, Eye, EyeOff, Home } from 'lucide-react';
 
 const registerSchema = z.object({
@@ -19,7 +20,8 @@ export const RegisterPage: React.FC = () => {
   const { register: registerAuth } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/dashboard';
+  const rawRedirect = searchParams.get('redirect');
+  const redirect = sanitizeRedirectPath(rawRedirect);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +42,7 @@ export const RegisterPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       await registerAuth(data);
-      navigate(redirect);
+      navigate(redirect, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng ký không thành công.');
     } finally {
@@ -155,7 +157,10 @@ export const RegisterPage: React.FC = () => {
         <div className="mt-6 flex flex-col items-center gap-2 text-center text-xs text-slate-500">
           <p>
             Đã có tài khoản?{' '}
-            <Link to="/login" className="text-indigo-600 font-semibold hover:underline">
+            <Link
+              to={rawRedirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'}
+              className="text-indigo-600 font-semibold hover:underline"
+            >
               Đăng nhập ngay
             </Link>
           </p>
